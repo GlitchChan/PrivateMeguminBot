@@ -12,7 +12,7 @@ log.add(
     backtrace=True,
     enqueue=True,
     diagnose=True,
-    rotation="24:00",
+    rotation="12:00",
     retention="10 days",
 )
 log.level("DEBUG")
