@@ -1,9 +1,11 @@
 import json
 import os
+import random
 
+from datetime import datetime
 from loguru import logger as log
 from pathlib import Path
-from naff import Client, listen
+from naff import Client, listen, Member, GuildChannel
 from naff.api.events import MessageCreate
 from naff.client.errors import HTTPException
 
@@ -84,3 +86,24 @@ class Megumin(Client):
             if k in message.content:
                 log.debug(f"Copypasta Detected!: {k}")
                 await message.reply(v)
+
+    @listen()
+    async def on_member_update(before: Member, after: Member):
+        """League mock check"""
+
+        # ignore bots
+        if after.bot:
+            return
+
+        if after.activities:
+            for a in after.activities:
+                if a.name.lower() == "league of legends":
+                    time_start = a.timestamps.start
+                    time_now = datetime.utcnow()
+                    duration = time_now - time_start
+
+                    seconds = duration.total_seconds()
+                    minutes = divmod(seconds, 60)[0]
+
+                    if minutes == 30:
+                        await after.send("Bro you really be playing league that long?")
