@@ -1,11 +1,10 @@
 import json
 import os
-import random
 
 from datetime import datetime
 from loguru import logger as log
 from pathlib import Path
-from naff import Client, listen, Member, GuildChannel
+from naff import Client, listen, Member
 from naff.api.events import MessageCreate
 from naff.client.errors import HTTPException
 
