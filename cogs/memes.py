@@ -49,7 +49,7 @@ class Memes(Extension):
 
     @slash_command("rate_me", description="I will rate the person you give")
     @slash_option("ratee", "Thing you want to rate", OptionTypes.STRING, required=False)
-    async def rate_me(self, ctx: InteractionContext, ratee: str):
+    async def command_rate_me(self, ctx: InteractionContext, ratee: str):
         rating = hash(ratee) % 10
         await ctx.send(f"I rate {ratee} a {rating}/10")
 
@@ -60,7 +60,7 @@ class Memes(Extension):
         OptionTypes.STRING,
         required=True,
     )
-    async def eight_ball(self, ctx: InteractionContext, question: str):
+    async def command_eight_ball(self, ctx: InteractionContext, question: str):
 
         responses = [
             "As I see it, yes.",
