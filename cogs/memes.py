@@ -107,7 +107,7 @@ class Memes(Extension):
         """megu confess `guild_id` `confession` and 1 image attachment"""
         attachments = ctx.message.attachments
         emb = await confession_embed(
-            "".join(confession), attachments[0] if attachments else None
+            " ".join(confession), attachments[0] if attachments else None
         )
         await ctx.send("Sending confession", delete_after=5)
 
