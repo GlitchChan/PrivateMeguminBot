@@ -1,4 +1,4 @@
-import json
+import random
 
 from io import BytesIO
 from utils import (
@@ -6,6 +6,7 @@ from utils import (
     get_confess_channel,
     confession_embed,
     has_permission,
+    embed_builder,
 )
 from petpetgif import petpet
 from naff import (
@@ -52,7 +53,46 @@ class Memes(Extension):
         rating = hash(ratee) % 10
         await ctx.send(f"I rate {ratee} a {rating}/10")
 
+    @slash_command(name="8ball", description="It's an 8ball")
+    @slash_option(
+        "question",
+        "Question you want to ask the eight ball",
+        OptionTypes.STRING,
+        required=True,
+    )
+    async def eight_ball(self, ctx: InteractionContext, question: str):
 
+        responses = [
+            "As I see it, yes.",
+            "Ask again later.",
+            "Better not tell you now.",
+            "Cannot predict now.",
+            "Concentrate and ask again.",
+            "Dont count on it.",
+            "It is certain.",
+            "It is decidedly so.",
+            "Most likely.",
+            "My reply is no.",
+            "My sources say no.",
+            "Outlook not so good.",
+            "Outlook good.",
+            "Reply hazy, try again.",
+            "Signs point to yes.",
+            "Very doubtful.",
+            "Without a doubt.",
+            "Yes.",
+            "Yes - definitely.",
+            "You may rely on it.",
+        ]
+
+        await ctx.send(
+            embeds=[
+                await embed_builder(
+                    title="Magic 8 Ball",
+                    description=f"Question: {question}\n Answer: {random.choice(responses)}",
+                )
+            ]
+        )
 
     @slash_command(
         "set_confession_channel",
