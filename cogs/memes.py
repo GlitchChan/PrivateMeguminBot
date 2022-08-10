@@ -86,7 +86,7 @@ class Memes(Extension):
         self, ctx: InteractionContext, confession: str, image: Attachment = None
     ):
         """Anon confessions to a set channel configured by the admins"""
-        emb = confession_embed(confession, image)
+        emb = await confession_embed(confession, image)
         try:
             channel_id = get_confess_channel(ctx.guild_id)
         except KeyError:
@@ -102,7 +102,7 @@ class Memes(Extension):
     ):
         """megu confess `guild_id` `confession` and 1 image attachment"""
         attachments = ctx.message.attachments
-        emb = confession_embed("".join(confession), attachments[0])
+        emb = await confession_embed("".join(confession), attachments[0])
         await ctx.send("Sending confession", delete_after=5)
 
         try:

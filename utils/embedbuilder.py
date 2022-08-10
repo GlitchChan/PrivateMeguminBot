@@ -48,7 +48,7 @@ async def embed_builder(
     return embed
 
 
-def confession_embed(confession: str, image: Attachment = None) -> Embed:
+async def confession_embed(confession: str, image: Attachment = None) -> Embed:
     """
     Create a confession embed for confession command
 
