@@ -29,8 +29,8 @@ class Megumin(Client):
     """A custom NAFF client stuffed with listeners and custom errors"""
 
     def __init__(self, *args, **kwargs):
-        self.default_prefix = "megu "
         super(Megumin, self).__init__(*args, **kwargs)
+        self.default_prefix = "megu "
 
     async def on_error(self, source: str, error: Exception, *args, **kwargs) -> None:
         """NAFF on_error override"""

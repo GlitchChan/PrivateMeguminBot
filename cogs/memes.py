@@ -25,6 +25,7 @@ from naff import (
     dm_only,
     prefixed_command,
     PrefixedContext,
+    DMChannel,
 )
 from loguru import logger as log
 
@@ -81,6 +82,12 @@ class Memes(Extension):
         self, ctx: InteractionContext, confession: str, image: Attachment = None
     ):
         """Anon confessions to a set channel configured by the admins"""
+
+        if isinstance(ctx.channel, DMChannel):
+            return await ctx.send(
+                "This command only works in guilds try using: megu confess `guild_id` `confession` and an optional 1 image attachment"
+            )
+
         emb = await confession_embed(confession, image)
         try:
             channel_id = get_confess_channel(ctx.guild_id)
@@ -99,7 +106,9 @@ class Memes(Extension):
     ):
         """megu confess `guild_id` `confession` and 1 image attachment"""
         attachments = ctx.message.attachments
-        emb = await confession_embed("".join(confession), attachments[0])
+        emb = await confession_embed(
+            "".join(confession), attachments[0] if attachments else None
+        )
         await ctx.send("Sending confession", delete_after=5)
 
         try:
