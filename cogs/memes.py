@@ -1,7 +1,6 @@
 import json
 
 from io import BytesIO
-from pathlib import Path
 from utils import (
     set_confess_channel,
     get_confess_channel,
@@ -46,6 +45,14 @@ class Memes(Extension):
 
         petpet_file = File(file=dest, file_name="petpet.gif")
         await ctx.send(file=petpet_file)
+
+    @slash_command("rate_me", description="I will rate the person you give")
+    @slash_option("ratee", "Thing you want to rate", OptionTypes.STRING, required=False)
+    async def rate_me(self, ctx: InteractionContext, ratee: str):
+        rating = hash(ratee) % 10
+        await ctx.send(f"I rate {ratee} a {rating}/10")
+
+
 
     @slash_command(
         "set_confession_channel",
