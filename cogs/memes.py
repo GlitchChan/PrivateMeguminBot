@@ -28,11 +28,6 @@ from naff import (
 )
 from loguru import logger as log
 
-with open(
-    f"{Path(__file__).parent.parent.absolute()}/config.json", encoding="utf-8"
-) as f:
-    config = json.load(f)
-
 
 class Memes(Extension):
     def __init__(self, client: Client):
@@ -97,6 +92,7 @@ class Memes(Extension):
         await self.client.get_channel(channel_id).send(embeds=[emb])
 
     @prefixed_command("confess")
+    @check(dm_only())
     async def prefixed_command_confess(
         self, ctx: PrefixedContext, guild_id: int, *confession: str
     ):
