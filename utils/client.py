@@ -29,6 +29,7 @@ class Megumin(Client):
     """A custom NAFF client stuffed with listeners and custom errors"""
 
     def __init__(self, *args, **kwargs):
+        self.default_prefix = "megu "
         super(Megumin, self).__init__(*args, **kwargs)
 
     async def on_error(self, source: str, error: Exception, *args, **kwargs) -> None:
@@ -56,7 +57,6 @@ class Megumin(Client):
             if cog not in ("__init__.py",) and cog[-3:] == ".py":
                 try:
                     self.load_extension(f"cogs.{cog[:-3]}")
-                    log.success(f"Successfully loaded {cog}")
                 except Exception as e:
                     log.exception(f"Failed to load cog {cog}", exc_info=e)
 

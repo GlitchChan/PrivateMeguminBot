@@ -1,5 +1,5 @@
 from datetime import datetime
-from naff import Embed, Color
+from naff import Embed, Color, Attachment
 from typing import Union, List, Optional, Tuple
 
 
@@ -17,20 +17,17 @@ async def embed_builder(
 ) -> Embed:
     """Quickly build embeds with one function call
 
-    Args:
-        description: The description of the embed. Defaults to None.
-        title: The title of the embed. Defaults to None.
-        color: The colour of the embed. Defaults to Color.random().
-        fields: A list of fields to add to the embed. Defaults to None.
-        thumbnail: The thumbnail of the embed. Defaults to None.
-        author: The author of the embed. Defaults to None.
-        footer: The footer of the embed. Defaults to None.
-        url: The url the embed should direct to when clicked. Defaults to None.
-        timestamp: Timestamp of embed content. Defaults to None.
-        image: The image of the embed. Defaults to None.
-
-    Returns:
-        A NAFF embed object
+    :param description: The description of the embed. Defaults to None.
+    :param title: The title of the embed. Defaults to None.
+    :param color: The colour of the embed. Defaults to Color.random().
+    :param fields: A list of fields to add to the embed. Defaults to None.
+    :param thumbnail: The thumbnail of the embed. Defaults to None.
+    :param author: The author of the embed. Defaults to None.
+    :param footer: The footer of the embed. Defaults to None.
+    :param url: The url the embed should direct to when clicked. Defaults to None.
+    :param timestamp: Timestamp of embed content. Defaults to None.
+    :param image: The image of the embed. Defaults to None.
+    :return: A NAFF embed object
     """
 
     embed = Embed(
@@ -49,3 +46,23 @@ async def embed_builder(
         embed.set_image(image)
 
     return embed
+
+
+def confession_embed(confession: str, image: Attachment = None) -> Embed:
+    """
+    Create a confession embed for confession command
+
+    :param confession: The confession
+    :param image: A discord Attachment if any
+    :returns: A discord embed
+    """
+
+    emb = await embed_builder(
+        title="Anonymous Confession",
+        description=confession,
+        footer=("Type /confess or DM me 'megu confess `guild_id` `confession`'", None),
+        image=image.url if image else None,
+        timestamp=datetime.now(),
+    )
+
+    return emb
