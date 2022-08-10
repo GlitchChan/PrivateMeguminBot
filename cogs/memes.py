@@ -90,6 +90,7 @@ class Memes(Extension):
             )
 
         await self.client.get_channel(channel_id).send(embeds=[emb])
+        await ctx.send("Sucessfully sent confession")
 
     @prefixed_command("confess")
     @check(dm_only())
