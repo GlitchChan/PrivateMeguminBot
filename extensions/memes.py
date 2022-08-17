@@ -1,44 +1,37 @@
 import random
-
 from io import BytesIO
-from utils import (
-    set_confess_channel,
-    get_confess_channel,
-    confession_embed,
-    has_permission,
-    embed_builder,
-)
+
+from naff import Attachment
+from naff import check
+from naff import dm_only
+from naff import Extension
+from naff import File
+from naff import guild_only
+from naff import GuildChannel
+from naff import InteractionContext
+from naff import OptionTypes
+from naff import Permissions
+from naff import prefixed_command
+from naff import PrefixedContext
+from naff import slash_command
+from naff import slash_option
+from naff import User
 from petpetgif import petpet
-from naff import (
-    Extension,
-    Client,
-    slash_option,
-    slash_command,
-    OptionTypes,
-    User,
-    InteractionContext,
-    Permissions,
-    File,
-    GuildChannel,
-    Attachment,
-    check,
-    dm_only,
-    prefixed_command,
-    PrefixedContext,
-    DMChannel,
-)
-from loguru import logger as log
+
+from core import confession_embed
+from core import embed_builder
+from core import get_confess_channel
+from core import has_permission
+from core import Megumin
+from core import set_confess_channel
 
 
 class Memes(Extension):
-    def __init__(self, client: Client):
-        self.client = client
-        log.success(f"Successfully loaded {__class__.__name__}")
+    bot: Megumin
 
     @slash_command("pet_pet", description="Send a pet pet gif of a certain user")
-    @slash_option("user", "User you want to pet", OptionTypes.USER, required=False)
+    @slash_option("user", "User you want to pet", OptionTypes.USER, required=True)
     async def command_pet_pet(self, ctx: InteractionContext, user: User):
-        """Silly command to pet a user"""
         source = BytesIO(await user.avatar.fetch())
         dest = BytesIO()
         petpet.make(source, dest)
@@ -48,7 +41,7 @@ class Memes(Extension):
         await ctx.send(file=petpet_file)
 
     @slash_command("rate_me", description="I will rate the person you give")
-    @slash_option("ratee", "Thing you want to rate", OptionTypes.STRING, required=False)
+    @slash_option("ratee", "Thing you want to rate", OptionTypes.STRING, required=True)
     async def command_rate_me(self, ctx: InteractionContext, ratee: str):
         rating = hash(ratee) % 10
         await ctx.send(f"I rate {ratee} a {rating}/10")
@@ -105,6 +98,7 @@ class Memes(Extension):
         required=True,
     )
     @check(has_permission(Permissions.MANAGE_CHANNELS))
+    @check(guild_only())
     async def command_set_confession_channel(
         self, ctx: InteractionContext, channel: GuildChannel
     ):
@@ -117,7 +111,8 @@ class Memes(Extension):
             )
         except:
             await ctx.send(
-                "An unexpected error occurred when setting the confession channel"
+                "An unexpected error occurred when setting the confession channel",
+                ephemeral=True,
             )
 
     @slash_command("confess", description="Anonymous confession of your sins")
@@ -125,16 +120,11 @@ class Memes(Extension):
     @slash_option(
         "image", "Any image you want to add", OptionTypes.ATTACHMENT, required=False
     )
+    @check(guild_only())
     async def command_confess(
         self, ctx: InteractionContext, confession: str, image: Attachment = None
     ):
         """Anon confessions to a set channel configured by the admins"""
-
-        if isinstance(ctx.channel, DMChannel):
-            return await ctx.send(
-                "This command only works in guilds try using: megu confess `guild_id` `confession` and an optional 1 image attachment"
-            )
-
         emb = await confession_embed(confession, image)
         try:
             channel_id = get_confess_channel(ctx.guild_id)
@@ -143,7 +133,7 @@ class Memes(Extension):
                 "Guild has not set up a confess channel.", ephemeral=True
             )
 
-        await self.client.get_channel(channel_id).send(embeds=[emb])
+        await self.bot.get_channel(channel_id).send(embeds=[emb])
         await ctx.send("Sucessfully sent confession", ephemeral=True)
 
     @prefixed_command("confess")
@@ -165,7 +155,7 @@ class Memes(Extension):
                 "Guild has not set up a confess channel.", delete_after=5
             )
 
-        await self.client.get_channel(channel_id).send(embeds=[emb])
+        await self.bot.get_channel(channel_id).send(embeds=[emb])
 
 
 def setup(client):

@@ -1,6 +1,7 @@
 from pathlib import Path
-from sqlitedict import SqliteDict
+
 from loguru import logger as log
+from sqlitedict import SqliteDict
 
 db_file = f"{Path(__file__).parent.parent.absolute()}/cache.sqlite3"
 

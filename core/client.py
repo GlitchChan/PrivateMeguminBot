@@ -1,28 +1,14 @@
 import json
 import os
-
 from datetime import datetime
-from loguru import logger as log
 from pathlib import Path
-from naff import Client, listen, Member
+
+from loguru import logger as log
+from naff import Client
+from naff import listen
+from naff import Member
 from naff.api.events import MessageCreate
 from naff.client.errors import HTTPException
-
-log.add(
-    "logs/megumin.log",
-    backtrace=True,
-    enqueue=True,
-    diagnose=True,
-    rotation="12:00",
-    retention="10 days",
-)
-log.level("DEBUG")
-
-with open(
-    f"{Path(__file__).parent.parent.absolute()}/copypastas.json",
-    encoding="utf8",
-) as f:
-    copypastas = json.load(f)
 
 
 class Megumin(Client):
@@ -52,14 +38,24 @@ class Megumin(Client):
             token: Your bot's token
 
         """
+        log.info("Initializing Extensions...")
 
-        for cog in os.listdir(f"{Path(__file__).parent.parent}/cogs"):
-            if cog not in ("__init__.py",) and cog[-3:] == ".py":
-                try:
-                    self.load_extension(f"cogs.{cog[:-3]}")
-                except Exception as e:
-                    log.exception(f"Failed to load cog {cog}", exc_info=e)
+        # https://github.com/NAFTeam/Bot-Template/blob/main/%7B%7B%20cookiecutter.project_slug%20%7D%7D/core/extensions_loader.py#L13-L21
+        for root, dirs, files in os.walk("extensions"):
+            for file in files:
+                if file.endswith(".py") and not file.startswith("__init__"):
+                    file = file.removesuffix(".py")
+                    path = os.path.join(root, file)
+                    python_import_path = path.replace(
+                        "/",
+                        ".",
+                    ).replace("\\", ".")
 
+                    self.load_extension(python_import_path)
+
+        log.success(
+            f"< {len(self.interactions.get(0, []))} > Global Interactions Loaded"
+        )
         super().start(token)
 
     @listen()
@@ -70,21 +66,6 @@ class Megumin(Client):
         log.info(
             f"Invite me: https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot"
         )
-
-    @listen()
-    async def on_message_create(self, event: MessageCreate):
-        """NAFF on_message_create override"""
-        message = event.message
-
-        # Ignore self-messages
-        if message.author.id == self.user.id:
-            return
-
-        # Copypasta
-        for k, v in copypastas.items():
-            if k in message.content:
-                log.debug(f"Copypasta Detected!: {k}")
-                await message.reply(v)
 
     @listen()
     async def on_member_update(before: Member, after: Member):
