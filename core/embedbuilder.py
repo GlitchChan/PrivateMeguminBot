@@ -1,12 +1,7 @@
 from datetime import datetime
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from typing import List, Optional, Tuple, Union
 
-from naff import Attachment
-from naff import Color
-from naff import Embed
+from naff import Attachment, Color, Embed
 
 
 async def embed_builder(

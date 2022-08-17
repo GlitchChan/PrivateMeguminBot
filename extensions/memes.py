@@ -1,29 +1,33 @@
 import random
 from io import BytesIO
 
-from naff import Attachment
-from naff import check
-from naff import dm_only
-from naff import Extension
-from naff import File
-from naff import guild_only
-from naff import GuildChannel
-from naff import InteractionContext
-from naff import OptionTypes
-from naff import Permissions
-from naff import prefixed_command
-from naff import PrefixedContext
-from naff import slash_command
-from naff import slash_option
-from naff import User
+from naff import (
+    Attachment,
+    Extension,
+    File,
+    GuildChannel,
+    InteractionContext,
+    OptionTypes,
+    Permissions,
+    PrefixedContext,
+    User,
+    check,
+    dm_only,
+    guild_only,
+    prefixed_command,
+    slash_command,
+    slash_option,
+)
 from petpetgif import petpet
 
-from core import confession_embed
-from core import embed_builder
-from core import get_confess_channel
-from core import has_permission
-from core import Megumin
-from core import set_confess_channel
+from core import (
+    Megumin,
+    confession_embed,
+    embed_builder,
+    get_confess_channel,
+    has_permission,
+    set_confess_channel,
+)
 
 
 class Memes(Extension):

@@ -2,15 +2,17 @@ import json
 from pathlib import Path
 
 from loguru import logger as log
-from naff import AutocompleteContext
-from naff import Buckets
-from naff import cooldown
-from naff import Extension
-from naff import InteractionContext
-from naff import listen
-from naff import OptionTypes
-from naff import slash_command
-from naff import slash_option
+from naff import (
+    AutocompleteContext,
+    Buckets,
+    Extension,
+    InteractionContext,
+    OptionTypes,
+    cooldown,
+    listen,
+    slash_command,
+    slash_option,
+)
 from naff.api.events import MessageCreate
 
 from core import Megumin

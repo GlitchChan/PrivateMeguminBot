@@ -1,5 +1,4 @@
-from naff import Context
-from naff import Permissions
+from naff import Context, Permissions
 
 
 def has_permission(*permissions: Permissions):
