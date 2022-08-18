@@ -56,12 +56,11 @@ class Copypasta(Extension):
                 return ctx.send(v)
 
     @copypasta_command.autocomplete("copypasta")
-    async def copypasta_command_autocomplete(
-        self, ctx: AutocompleteContext, copypasta: str
-    ):
+    async def copypasta_command_autocomplete(self, ctx: AutocompleteContext, copypasta: str):
         choices = []
         for k, v in copypastas.items():
-            choices.append({"name": k, "value": k})
+            if copypasta.lower() in k:
+                choices.append({"name": k, "value": k})
 
         await ctx.send(choices=choices)
 
