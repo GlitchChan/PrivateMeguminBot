@@ -47,7 +47,7 @@ class Memes(Extension):
     @slash_command("rate_me", description="I will rate the person you give")
     @slash_option("ratee", "Thing you want to rate", OptionTypes.STRING, required=True)
     async def command_rate_me(self, ctx: InteractionContext, ratee: str):
-        rating = hash(ratee) % 10
+        rating = (hash(ratee) % 10) + 1
         await ctx.send(f"I rate {ratee} a {rating}/10")
 
     @slash_command(name="8ball", description="It's an 8ball")
@@ -103,9 +103,7 @@ class Memes(Extension):
     )
     @check(has_permission(Permissions.MANAGE_CHANNELS))
     @check(guild_only())
-    async def command_set_confession_channel(
-        self, ctx: InteractionContext, channel: GuildChannel
-    ):
+    async def command_set_confession_channel(self, ctx: InteractionContext, channel: GuildChannel):
         """Command to set the confession channel for a guild"""
         try:
             set_confess_channel(ctx.guild_id, channel.id)
@@ -121,43 +119,31 @@ class Memes(Extension):
 
     @slash_command("confess", description="Anonymous confession of your sins")
     @slash_option("confession", "Your confession", OptionTypes.STRING, required=True)
-    @slash_option(
-        "image", "Any image you want to add", OptionTypes.ATTACHMENT, required=False
-    )
+    @slash_option("image", "Any image you want to add", OptionTypes.ATTACHMENT, required=False)
     @check(guild_only())
-    async def command_confess(
-        self, ctx: InteractionContext, confession: str, image: Attachment = None
-    ):
+    async def command_confess(self, ctx: InteractionContext, confession: str, image: Attachment = None):
         """Anon confessions to a set channel configured by the admins"""
         emb = await confession_embed(confession, image)
         try:
             channel_id = get_confess_channel(ctx.guild_id)
         except KeyError:
-            return await ctx.send(
-                "Guild has not set up a confess channel.", ephemeral=True
-            )
+            return await ctx.send("Guild has not set up a confess channel.", ephemeral=True)
 
         await self.bot.get_channel(channel_id).send(embeds=[emb])
         await ctx.send("Sucessfully sent confession", ephemeral=True)
 
     @prefixed_command("confess")
     @check(dm_only())
-    async def prefixed_command_confess(
-        self, ctx: PrefixedContext, guild_id: int, *confession: str
-    ):
+    async def prefixed_command_confess(self, ctx: PrefixedContext, guild_id: int, *confession: str):
         """megu confess `guild_id` `confession` and 1 image attachment"""
         attachments = ctx.message.attachments
-        emb = await confession_embed(
-            " ".join(confession), attachments[0] if attachments else None
-        )
+        emb = await confession_embed(" ".join(confession), attachments[0] if attachments else None)
         await ctx.send("Sending confession", delete_after=5)
 
         try:
             channel_id = get_confess_channel(guild_id)
         except KeyError:
-            return await ctx.send(
-                "Guild has not set up a confess channel.", delete_after=5
-            )
+            return await ctx.send("Guild has not set up a confess channel.", delete_after=5)
 
         await self.bot.get_channel(channel_id).send(embeds=[emb])
 
