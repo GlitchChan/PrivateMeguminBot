@@ -1,11 +1,8 @@
-import json
 import os
 from datetime import datetime
-from pathlib import Path
 
 from loguru import logger as log
 from naff import Client, Member, listen
-from naff.api.events import MessageCreate
 from naff.client.errors import HTTPException
 
 
@@ -20,10 +17,7 @@ class Megumin(Client):
         """NAFF on_error override"""
         if isinstance(error, HTTPException):
             errors = error.search_for_message(error.errors)
-            out = (
-                f"HTTPException: {error.status}|{error.response.reason}: "
-                + "\n".join(errors)
-            )
+            out = f"HTTPException: {error.status}|{error.response.reason}: " + "\n".join(errors)
             log.error(out, exc_info=error)
         else:
             log.error(f"Ignoring exception in {source}", exc_info=error)
@@ -51,16 +45,14 @@ class Megumin(Client):
 
                     self.load_extension(python_import_path)
 
-        log.success(
-            f"< {len(self.interactions.get(0, []))} > Global Interactions Loaded"
-        )
+        log.success(f"< {len(self.interactions.get(0, []))} > Global Interactions Loaded")
         super().start(token)
 
     @listen()
-    async def on_ready(self):
-        """NAFF on_ready override"""
-        log.info(f"Logged in as {self.user}")
-        log.info(f"Connected to {len(self.guilds)} guild(s)")
+    async def on_startup(self) -> None:
+        """NAFF on_startup override"""
+        log.success(f"Logged in as {self.user}")
+        log.success(f"Connected to {len(self.guilds)} guild(s)")
         log.info(
             f"Invite me: https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot"
         )
