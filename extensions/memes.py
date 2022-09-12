@@ -111,7 +111,7 @@ class Memes(Extension):
                 f"Successfully set the confession channel to {channel.mention}",
                 ephemeral=True,
             )
-        except:
+        except Exception:
             await ctx.send(
                 "An unexpected error occurred when setting the confession channel",
                 ephemeral=True,
@@ -129,7 +129,7 @@ class Memes(Extension):
         except KeyError:
             return await ctx.send("Guild has not set up a confess channel.", ephemeral=True)
 
-        await self.bot.get_channel(channel_id).send(embeds=[emb])
+        await ctx.bot.get_channel(channel_id).send(embeds=[emb])
         await ctx.send("Sucessfully sent confession", ephemeral=True)
 
     @prefixed_command("confess")
@@ -145,7 +145,7 @@ class Memes(Extension):
         except KeyError:
             return await ctx.send("Guild has not set up a confess channel.", delete_after=5)
 
-        await self.bot.get_channel(channel_id).send(embeds=[emb])
+        await ctx.bot.get_channel(channel_id).send(embeds=[emb])
 
 
 def setup(client):
