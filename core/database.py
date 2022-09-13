@@ -21,7 +21,7 @@ def set_confess_channel(guild_id: int, channel_id: int) -> None:
             log.opt(exception=True).exception("An error occurred when trying to set guild confess channel")
 
 
-def get_confess_channel(guild_id: int) -> None:
+def get_confess_channel(guild_id: int) -> int:
     """Function to fetch the confession channel for a given guild
 
     :param guild_id: The id of the guild
