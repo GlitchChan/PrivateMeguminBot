@@ -1,6 +1,11 @@
+import os
+import sys
+from distutils.util import strtobool
+
 import jurigged
 from loguru import logger as log
 
+log.remove()
 log.add(
     "logs/megumin.log",
     backtrace=True,
@@ -9,6 +14,7 @@ log.add(
     rotation="12:00",
     retention="10 days",
 )
+log.add(sys.stdout, level="DEBUG" if strtobool(os.getenv("DEBUG")) else "INFO")
 log.level("JURIG", no=11, color="<fg #3a304e>")
 
 

@@ -4,13 +4,12 @@ from distutils.util import strtobool
 from dotenv import load_dotenv
 from naff import Intents
 
-from core import Megumin, jlogger, log
+# Load environment vars
+load_dotenv()
+
+from core import Megumin, jlogger
 
 if __name__ == "__main__":
-
-    # Load environment vars
-    load_dotenv()
-    log.level("DEBUG" if strtobool(os.getenv("DEBUG")) else "INFO")
 
     if strtobool(os.getenv("DEBUG")):
         import jurigged
