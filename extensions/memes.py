@@ -154,8 +154,11 @@ class Memes(Extension):
         leaderboard = get_sex_leaderboard()
         leaderboard = dict(sorted(leaderboard.items(), key=lambda kv: kv[1], reverse=True))
         leaderboard = [f"<@{k}>: {v} Sex Messages" for k, v in leaderboard.items()]
+        if len(leaderboard) > 10:
+            leaderboard = leaderboard[:10]
+
         leaderboard = " \n".join(leaderboard)
-        await ctx.send(embeds=[await embed_builder(leaderboard, "Sex Leaderboard", color="#f47fff")])
+        await ctx.send(embeds=[await embed_builder(leaderboard, "Sex Leaderboard Top 10", color="#f47fff")])
 
     @slash_command("set_sex_number", description="Sets a users sex count")
     @slash_option("user", "User to update", OptionTypes.USER, required=True)
