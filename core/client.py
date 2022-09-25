@@ -1,8 +1,7 @@
 import os
-from datetime import datetime
 
 from loguru import logger as log
-from naff import Client, Member, listen
+from naff import Client, listen
 from naff.client.errors import HTTPException
 
 
@@ -21,7 +20,7 @@ class Megumin(Client):
             out = f"HTTPException: {error.status}|{error.response.reason}: " + "\n".join(errors)
             log.error(out, exc_info=error)
         else:
-            log.error(f"Ignoring exception in {source}", exc_info=error)
+            log.opt(exception=True).error(f"Ignoring exception in {source}")
 
     def start(self, token) -> None:
         """
@@ -57,24 +56,3 @@ class Megumin(Client):
         log.info(
             f"Invite me: https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot"
         )
-
-    @listen()
-    async def on_member_update(before: Member, after: Member):
-        """League mock check"""
-
-        # ignore bots
-        if after.bot:
-            return
-
-        if after.activities:
-            for a in after.activities:
-                if a.name.lower() == "league of legends":
-                    time_start = a.timestamps.start
-                    time_now = datetime.utcnow()
-                    duration = time_now - time_start
-
-                    seconds = duration.total_seconds()
-                    minutes = divmod(seconds, 60)[0]
-
-                    if minutes == 30:
-                        await after.send("Bro you really be playing league that long?")
