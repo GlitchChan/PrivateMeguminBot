@@ -1,89 +1,77 @@
-from pathlib import Path
+from typing import Union
 
 from loguru import logger as log
-from sqlitedict import SqliteDict
+from prisma import Prisma
 
-db_file = f"{Path(__file__).parent.parent.absolute()}/cache.sqlite3"
-
-confession = SqliteDict(db_file, tablename="Confession", autocommit=True)
-sex = SqliteDict(db_file, tablename="Sex", autocommit=True)
+prisma = Prisma(auto_register=True)
 
 
-def set_confess_channel(guild_id: int, channel_id: int) -> None:
-    """Function to set the confession channel for a given guild
+# Confession Channel Database Functions
+async def set_confession_channel(guild_id: int, channel_id: int) -> None:
+    """Function to set/update the confession channel for a given guild
 
     :param guild_id: The id of the guild
-    :param channel_id: The id of the channel being set
+    :param channel_id: The id of the channel being set/updated
     :return: None
     """
-    with confession as db:
-        try:
-            db[guild_id] = {"confess channel": channel_id}
-            log.debug(f"Successfully set confession channel for {guild_id}")
-        except Exception:
-            log.opt(exception=True).exception("An error occurred when trying to set guild confess channel")
+    async with prisma as db:
+        await db.server.upsert(
+            where={"id": guild_id},
+            data={"create": {"id": guild_id, "confess_channel": channel_id}, "update": {"confess_channel": channel_id}},
+        )
+        log.debug(f"Successfully set confession channel for {guild_id}")
 
 
-def get_confess_channel(guild_id: int) -> int:
-    """Function to fetch the confession channel for a given guild
+async def get_confession_channel(guild_id: int) -> Union[int, None]:
+    """Function to get the confession channel for a given guild
 
     :param guild_id: The id of the guild
-    :return: The channels id
+    :return: Confession channel ID or None if not set
     """
-    with confession as db:
+    async with prisma as db:
         try:
-            confess_channel = db[guild_id]["confess channel"]
-            return confess_channel
-        except KeyError:
-            KeyError("Guild has not set a confession channel")
+            guild = await db.server.find_unique(where={"id": guild_id})
+
+            return guild.confess_channel
+        except AttributeError:
+            log.warning(f"Guild {guild_id} has not set a confession channel")
+            return None
 
 
-def update_sex_leaderboard(author_id: int) -> None:
-    """Function to update the sex leaderboard
+# Sex Message Leaderboard Functions
+async def update_user_sex_count(user_id: int) -> None:
+    """Function to update a users sex message counter
 
-    :param author_id: The id of the sex messanger
+    :param user_id: The id of the user
     :return: None
     """
-    with sex as db:
-        try:
-            try:
-                sex_count = db[author_id]["sex_count"]
-            except KeyError:
-                sex_count = 1
-            log.debug(f"Sex count for {author_id} is {sex_count}")
-            db[author_id] = {"sex_count": sex_count + 1}
-        except KeyError:
-            KeyError("Something happened")
+    async with prisma as db:
+        await db.user.upsert(
+            where={"id": user_id}, data={"create": {"id": user_id}, "update": {"sex_count": {"increment": 1}}}
+        )
+        log.debug(f"Successfully updated {user_id} sex_count")
 
 
-def set_sex_number(author_id: int, sex_count: int) -> None:
-    """Sets a users sex counter
+async def set_user_sex_count(user_id: int, sex_count: int) -> None:
+    """Function to set a users sex message counter
 
-    :param author_id: The id of the sex messanger
-    :param sex_count: The amount of sex messages that will be set
+    :param user_id: The id of the user
+    :param sex_count: The number to set for the counter
     :return: None
     """
-    with sex as db:
-        try:
-            db[author_id] = {"sex_count": int(sex_count)}
-        except KeyError:
-            KeyError("Something happened")
+    async with prisma as db:
+        await db.user.upsert(
+            where={"id": user_id},
+            data={"create": {"id": user_id, "sex_count": sex_count}, "update": {"sex_count": sex_count}},
+        )
+        log.debug(f"Successfully updated {user_id} sex_count")
 
 
-def get_sex_leaderboard() -> dict:
-    """Gets the leaderboard for sex messages
+async def get_sex_leaderboard() -> list:
+    """Function to get the top 10 of the sex message leaderboard
 
-    :return: Dict of leaderboard
+    :return: List of Users
     """
-
-    leaderboard = {}
-
-    with sex as db:
-        try:
-            for k, v in db.items():
-                leaderboard[k] = v["sex_count"]
-        except KeyError:
-            KeyError("Something happened")
-
-    log.debug(leaderboard)
-    return leaderboard
+    async with prisma as db:
+        leaderboard = await db.user.find_many(take=10, order={"sex_count": "desc"})
+        return leaderboard

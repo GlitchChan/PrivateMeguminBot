@@ -14,7 +14,7 @@ log.add(
     rotation="12:00",
     retention="10 days",
 )
-log.add(sys.stdout, level="DEBUG" if strtobool(os.getenv("DEBUG")) else "INFO")
+log.add(sys.stdout, level="DEBUG" if strtobool(os.getenv("DEBUG")) else "INFO", enqueue=True)
 log.level("JURIG", no=11, color="<fg #3a304e>")
 
 

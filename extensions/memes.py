@@ -24,11 +24,11 @@ from core import (
     Megumin,
     confession_embed,
     embed_builder,
-    get_confess_channel,
+    get_confession_channel,
     get_sex_leaderboard,
     has_permission,
-    set_confess_channel,
-    set_sex_number,
+    set_confession_channel,
+    set_user_sex_count,
 )
 
 
@@ -107,17 +107,11 @@ class Memes(Extension):
     @check(guild_only())
     async def command_set_confession_channel(self, ctx: InteractionContext, channel: GuildChannel):
         """Command to set the confession channel for a guild"""
-        try:
-            set_confess_channel(ctx.guild_id, channel.id)
-            await ctx.send(
-                f"Successfully set the confession channel to {channel.mention}",
-                ephemeral=True,
-            )
-        except Exception:
-            await ctx.send(
-                "An unexpected error occurred when setting the confession channel",
-                ephemeral=True,
-            )
+        await set_confession_channel(ctx.guild_id, channel.id)
+        await ctx.send(
+            f"Successfully set the confession channel to {channel.mention}",
+            ephemeral=True,
+        )
 
     @slash_command("confess", description="Anonymous confession of your sins")
     @slash_option("confession", "Your confession", OptionTypes.STRING, required=True)
@@ -126,12 +120,12 @@ class Memes(Extension):
     async def command_confess(self, ctx: InteractionContext, confession: str, image: Attachment = None):
         """Anon confessions to a set channel configured by the admins"""
         emb = await confession_embed(confession, image)
-        try:
-            channel_id = get_confess_channel(ctx.guild_id)
-        except KeyError:
+        confess_channel = await get_confession_channel(ctx.guild_id)
+
+        if confess_channel is None:
             return await ctx.send("Guild has not set up a confess channel.", ephemeral=True)
 
-        await ctx.bot.get_channel(channel_id).send(embeds=[emb])
+        await ctx.bot.get_channel(confess_channel).send(embeds=[emb])
         await ctx.send("Sucessfully sent confession", ephemeral=True)
 
     @prefixed_command("confess")
@@ -142,22 +136,18 @@ class Memes(Extension):
         emb = await confession_embed(confession, attachments[0] if attachments else None)
         await ctx.send("Sending confession", delete_after=5)
 
-        try:
-            channel_id = get_confess_channel(guild_id)
-        except KeyError:
+        confess_channel = await get_confession_channel(guild_id)
+
+        if confess_channel is None:
             return await ctx.send("Guild has not set up a confess channel.", delete_after=5)
 
-        await ctx.bot.get_channel(channel_id).send(embeds=[emb])
+        await ctx.bot.get_channel(confess_channel).send(embeds=[emb])
 
     @slash_command("sex_leaderboard", description="Fetches the sex leaderboard")
     async def slash_sex_leaderboard(self, ctx: InteractionContext):
-        leaderboard = get_sex_leaderboard()
-        leaderboard = dict(sorted(leaderboard.items(), key=lambda kv: kv[1], reverse=True))
-        leaderboard = [f"<@{k}>: {v} Sex Messages" for k, v in leaderboard.items()]
-        if len(leaderboard) > 10:
-            leaderboard = leaderboard[:10]
-
+        leaderboard = [f"<@{user.id}> | {user.sex_count} Sex Messages" for user in await get_sex_leaderboard()]
         leaderboard = " \n".join(leaderboard)
+
         await ctx.send(embeds=[await embed_builder(leaderboard, "Sex Leaderboard Top 10", color="#f47fff")])
 
     @slash_command("set_sex_number", description="Sets a users sex count")
@@ -165,7 +155,7 @@ class Memes(Extension):
     @slash_option("count", "Number to use", OptionTypes.INTEGER, required=True)
     @check(has_permission(Permissions.MODERATE_MEMBERS))
     async def slash_set_sex_number(self, ctx: InteractionContext, user: User, count: int):
-        set_sex_number(user.id, count)
+        await set_user_sex_count(user.id, int(count))
         await ctx.send(f"Successfully set {user}'s sex count to: {int(count)}", ephemeral=True)
 
 

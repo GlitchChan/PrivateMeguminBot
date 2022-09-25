@@ -6,7 +6,7 @@ from loguru import logger as log
 from naff import DMChannel, Extension, listen
 from naff.api.events import MessageCreate
 
-from core import Megumin, update_sex_leaderboard
+from core import Megumin, update_user_sex_count
 
 with open(
     f"{Path(__file__).parent.parent.absolute()}/copypastas.json",
@@ -28,9 +28,10 @@ class Copypasta(Extension):
 
         if re.search(r"se(x|gg?s)", message.content, re.IGNORECASE):
             if isinstance(message.channel, DMChannel):
+                log.debug("Ignoring DM Sex Message")
                 return
             log.debug("Detected Sex")
-            update_sex_leaderboard(message.author.id)
+            await update_user_sex_count(message.author.id)
 
         # Copypasta
         for k, v in copypastas.items():
