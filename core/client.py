@@ -12,6 +12,7 @@ class Megumin(Client):
     def __init__(self, *args, **kwargs):
         super(Megumin, self).__init__(*args, **kwargs)
         self.default_prefix = "megu "
+        self.send_command_tracebacks = False
 
     async def on_error(self, source: str, error: Exception, *args, **kwargs) -> None:
         """NAFF on_error override"""
