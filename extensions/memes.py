@@ -136,10 +136,10 @@ class Memes(Extension):
 
     @prefixed_command("confess")
     @check(dm_only())
-    async def prefixed_command_confess(self, ctx: PrefixedContext, guild_id: int, *confession: str):
+    async def prefixed_command_confess(self, ctx: PrefixedContext, guild_id: int, *, confession: str):
         """megu confess `guild_id` `confession` and 1 image attachment"""
         attachments = ctx.message.attachments
-        emb = await confession_embed(" ".join(confession), attachments[0] if attachments else None)
+        emb = await confession_embed(confession, attachments[0] if attachments else None)
         await ctx.send("Sending confession", delete_after=5)
 
         try:
