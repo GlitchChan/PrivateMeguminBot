@@ -26,7 +26,7 @@ class Copypasta(Extension):
         if message.author.bot:
             return
 
-        if re.search(r"se(x|gs)", message.content, re.IGNORECASE):
+        if re.search(r"se(x|gg?s)", message.content, re.IGNORECASE):
             log.debug("Detected Sex")
             update_sex_leaderboard(message.author.id)
 
