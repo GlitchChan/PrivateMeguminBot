@@ -14,6 +14,7 @@ from naff import (
     check,
     dm_only,
     guild_only,
+    is_owner,
     prefixed_command,
     slash_command,
     slash_option,
@@ -153,7 +154,7 @@ class Memes(Extension):
     @slash_command("set_sex_number", description="Sets a users sex count")
     @slash_option("user", "User to update", OptionTypes.USER, required=True)
     @slash_option("count", "Number to use", OptionTypes.INTEGER, required=True)
-    @check(has_permission(Permissions.MODERATE_MEMBERS))
+    @check(is_owner())
     async def slash_set_sex_number(self, ctx: InteractionContext, user: User, count: int):
         await set_user_sex_count(user.id, int(count))
         await ctx.send(f"Successfully set {user}'s sex count to: {int(count)}", ephemeral=True)
