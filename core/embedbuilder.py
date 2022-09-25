@@ -7,7 +7,7 @@ from naff import Attachment, Color, Embed
 async def embed_builder(
     description: Optional[str] = None,
     title: Optional[str] = None,
-    color: Optional[Union[Color, dict, tuple, list, str, int]] = Color.random(),
+    color: Optional[Union[Color, dict, tuple, list, str, int]] = None,
     fields: Optional[List[Tuple[str, str, bool]]] = None,
     thumbnail: Optional[str] = None,
     author: Optional[Tuple[str, str]] = None,
@@ -31,9 +31,10 @@ async def embed_builder(
     :return: A NAFF embed object
     """
 
-    embed = Embed(
-        title=title, description=description, color=color, url=url, timestamp=timestamp
-    )
+    if color is None:
+        color = Color.random()
+
+    embed = Embed(title=title, description=description, color=color, url=url, timestamp=timestamp)
     if fields:
         for field in fields:
             embed.add_field(field[0], field[1], bool(field[2]))
