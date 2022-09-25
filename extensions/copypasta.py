@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 from loguru import logger as log
-from naff import Extension, listen
+from naff import DMChannel, Extension, listen
 from naff.api.events import MessageCreate
 
 from core import Megumin, update_sex_leaderboard
@@ -27,6 +27,8 @@ class Copypasta(Extension):
             return
 
         if re.search(r"se(x|gg?s)", message.content, re.IGNORECASE):
+            if isinstance(message.channel, DMChannel):
+                return
             log.debug("Detected Sex")
             update_sex_leaderboard(message.author.id)
 
