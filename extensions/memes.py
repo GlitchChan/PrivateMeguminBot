@@ -153,9 +153,15 @@ class Memes(Extension):
     async def slash_sex_leaderboard(self, ctx: InteractionContext):
         leaderboard = get_sex_leaderboard()
         leaderboard = dict(sorted(leaderboard.items(), key=lambda kv: kv[1], reverse=True))
-        leaderboard = [f"<@{k}>: {v} Sex Messages" for k, v in leaderboard.items()]
-        leaderboard = " \n".join(leaderboard)
-        await ctx.send(embeds=[await embed_builder(leaderboard, "Sex Leaderboard", color="#f47fff")])
+        if len(leaderboard) > 10:
+            while limit := 0 <= 10:
+                leaderboard = [f"<@{k}>: {v} Sex Messages" for k, v in leaderboard.items()]
+                leaderboard = " \n".join(leaderboard)
+                limit += 1
+        else:
+            leaderboard = [f"<@{k}>: {v} Sex Messages" for k, v in leaderboard.items()]
+            leaderboard = " \n".join(leaderboard)
+        await ctx.send(embeds=[await embed_builder(leaderboard, "Sex Leaderboard Top 10", color="#f47fff")])
 
     @slash_command("set_sex_number", description="Sets a users sex count")
     @slash_option("user", "User to update", OptionTypes.USER, required=True)
