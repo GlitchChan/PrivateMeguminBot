@@ -6,7 +6,7 @@ from loguru import logger as log
 from naff import Extension, listen
 from naff.api.events import MessageCreate
 
-from core import Megumin
+from core import Megumin, update_sex_leaderboard
 
 with open(
     f"{Path(__file__).parent.parent.absolute()}/copypastas.json",
@@ -25,6 +25,10 @@ class Copypasta(Extension):
         # Ingore self and bot message:
         if message.author.bot:
             return
+
+        if re.search(r"se(x|gs)", message.content, re.IGNORECASE):
+            log.debug("Detected Sex")
+            update_sex_leaderboard(message.author.id)
 
         # Copypasta
         for k, v in copypastas.items():

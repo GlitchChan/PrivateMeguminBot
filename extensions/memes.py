@@ -25,8 +25,10 @@ from core import (
     confession_embed,
     embed_builder,
     get_confess_channel,
+    get_sex_leaderboard,
     has_permission,
     set_confess_channel,
+    set_sex_number,
 )
 
 
@@ -146,6 +148,22 @@ class Memes(Extension):
             return await ctx.send("Guild has not set up a confess channel.", delete_after=5)
 
         await ctx.bot.get_channel(channel_id).send(embeds=[emb])
+
+    @slash_command("sex_leaderboard", description="Fetches the sex leaderboard")
+    async def slash_sex_leaderboard(self, ctx: InteractionContext):
+        leaderboard = get_sex_leaderboard()
+        leaderboard = dict(sorted(leaderboard.items(), key=lambda kv: kv[1], reverse=True))
+        leaderboard = [f"<@{k}>: {v} Sex Messages" for k, v in leaderboard.items()]
+        leaderboard = " \n".join(leaderboard)
+        await ctx.send(embeds=[await embed_builder(leaderboard, "Sex Leaderboard", color="#f47fff")])
+
+    @slash_command("set_sex_number", description="Sets a users sex count")
+    @slash_option("user", "User to update", OptionTypes.USER, required=True)
+    @slash_option("count", "Number to use", OptionTypes.INTEGER, required=True)
+    @check(has_permission(Permissions.MODERATE_MEMBERS))
+    async def slash_set_sex_number(self, ctx: InteractionContext, user: User, count: int):
+        set_sex_number(user.id, count)
+        await ctx.send(f"Successfully set {user}'s sex count to: {int(count)}", ephemeral=True)
 
 
 def setup(client):

@@ -19,11 +19,10 @@ log.level("JURIG", no=11, color="<fg #3a304e>")
 
 
 def jlogger(event: object) -> None:
-    """
-    Logging for jurigged
+    """Logging for jurigged
 
-    Args:
-        event: Event to parse
+    :param event: Event to parse
+    :return: None
     """
     if isinstance(event, jurigged.live.WatchOperation):
         log.log("JURIG", f"Watch {event.filename}")
