@@ -1,6 +1,7 @@
 import random
 from io import BytesIO
 
+from humanize import intword
 from naff import (
     Attachment,
     Extension,
@@ -146,7 +147,7 @@ class Memes(Extension):
 
     @slash_command("sex_leaderboard", description="Fetches the sex leaderboard")
     async def slash_sex_leaderboard(self, ctx: InteractionContext):
-        leaderboard = [f"<@{user.id}> | {user.sex_count} Sex Messages" for user in await get_sex_leaderboard()]
+        leaderboard = [f"<@{user.id}> | {intword(user.sex_count)} Sex Messages" for user in await get_sex_leaderboard()]
         leaderboard = " \n".join(leaderboard)
 
         await ctx.send(embeds=[await embed_builder(leaderboard, "Sex Leaderboard Top 10", color="#f47fff")])

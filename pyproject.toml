@@ -14,6 +14,7 @@ pet-pet-gif = "^1.0.2"
 python-dotenv = "^0.20.0"
 loguru = "^0.6.0"
 prisma = "^0.6.6"
+humanize = "^4.4.0"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.20.0"
