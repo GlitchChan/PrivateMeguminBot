@@ -1,7 +1,7 @@
 import random
 from io import BytesIO
 
-from humanize import intword
+from humanize import intcomma, intword
 from naff import (
     Attachment,
     Extension,
@@ -146,13 +146,15 @@ class Memes(Extension):
         await ctx.bot.get_channel(confess_channel).send(embeds=[emb])
 
     @slash_command("sex_leaderboard", description="Fetches the sex leaderboard")
-    async def slash_sex_leaderboard(self, ctx: InteractionContext):
+    @slash_option("raw", "Show raw numbers instead of formatted", OptionTypes.BOOLEAN, required=False)
+    async def slash_sex_leaderboard(self, ctx: InteractionContext, raw: bool = False):
         leaderboard = [
-            f"<@{user.id}> | {intword(user.sex_count).capitalize()} Sex" for user in await get_sex_leaderboard()
+            f"<@{user.id}> | {intcomma(user.sex_count) if raw else intword(user.sex_count)} Sex"
+            for user in await get_sex_leaderboard()
         ]
         leaderboard = " \n".join(leaderboard)
 
-        await ctx.send(embeds=[await embed_builder(leaderboard, "Sex Leaderboard Top 10", color="#f47fff")])
+        await ctx.send(embeds=[await embed_builder(leaderboard, "Top 10 Sex", color="#f47fff")])
 
     @slash_command("set_sex_number", description="Sets a users sex count")
     @slash_option("user", "User to update", OptionTypes.USER, required=True)
