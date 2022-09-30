@@ -26,7 +26,8 @@ class Copypasta(Extension):
         if message.author.bot:
             return
 
-        if re.search(r"se(x|gg?s)", message.content, re.IGNORECASE):
+        # Sex message counter
+        if re.search(r"se(x|gg?s|cks)", message.content, re.IGNORECASE):
             if isinstance(message.channel, DMChannel):
                 log.debug("Ignoring DM Sex Message")
                 return
