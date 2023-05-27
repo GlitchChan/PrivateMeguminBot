@@ -1,25 +1,141 @@
 [tool.poetry]
-name = "megumin-bot"
-version = "0.1.0"
-description = ""
-authors = ["glitchy <thepatheticweebgamer@gmail.com>"]
+name = "Neco Arc"
+version = "0.69.dev1"
+description = "Burenyuu!"
+authors = ["glitchy <glitchy@cunny.social>"]
+license = "GPL-3.0-only"
+readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-naff = { extras = ["all"], version = "^1.8.1" }
-pygelbooru = "^0.5.0"
-NHentai-API = "^0.0.19"
-asyncpraw = "^7.5.0"
+python = "^3.11"
+prisma = "^0.8.2"
 pet-pet-gif = "^1.0.2"
-python-dotenv = "^0.20.0"
-loguru = "^0.6.0"
-prisma = "^0.6.6"
-humanize = "^4.4.0"
+loguru = "^0.7.0"
+aiofiles = "^23.1.0"
+humanize = "^4.6.0"
+tomlkit = "^0.11.7"
+discord-py-interactions = {extras = ["speedup", "jurigged"], version = "^5.5.1"}
 
-[tool.poetry.dev-dependencies]
-pre-commit = "^2.20.0"
-jurigged = "^0.5.2"
+[tool.poetry.group.dev]
+optional = true
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.0.270"
+mypy = "^1.2.0"
+black = "^23.3.0"
+
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+
+[tool.mypy]
+files = ["."]
+plugins = "interactions.ext.mypy"
+
+# temporarily ignore some files
+show_error_codes = true
+follow_imports = "silent"
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_reexport = true
+warn_unused_configs = true
+disallow_subclassing_any = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+
+[tool.ruff]
+fix = true
+line-length = 120
+target-version = "py311"
+ignore = ["ANN101", "ANN102", "D100", "PLR0913", "S311", "FBT001"]
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+select = [
+    "E", # Pycodestyle errors
+    "F", # Pyflakes
+    "D", # Pycodestyle docstrings
+    "W", # Pycodestyle warnings
+    "I", # Isort
+    "C90", # Maccabe
+    "UP", # Pyupgrade
+    "N", # Pep8 naming
+    "ANN", # Flake8 annotations
+    "S", # Flake8 bandit
+    "BLE", # Flake8 blind except
+    "FBT", # Flake8 boolean trap
+    "A", # Flake8 builtins
+    "B", # Flake8 bugbear
+    "C4", # Flake8 comprehensions
+    "T20", # Flake8 print
+    "ICN", # Flake8 import conventions
+    "Q", # Flake8 quotes
+    "RET", # Flake8 return
+    "TID", # Flake8 tidy imports
+    "SIM", # Flake8 simplify
+    "ARG", # Flake8 unused arguments
+    "DTZ", # Flake8 datetimez
+    "YTT", # Flake8 2020
+    "PIE", # Flake8 pie
+    "PT", # Flake8 pytest style
+    "ISC", # Flake8 implicit string concat
+    # "ERA", # Commented out code
+    "PGH", # Pygrep hooks
+    "PLC", # Pylint convention
+    "PLE", # Pylint errors
+    "PLR", # Pylint refactor
+    "PLW", # Pylint warnings
+    "RUF", # Ruff specific rules
+]
+
+[tool.ruff.isort]
+force-wrap-aliases = true
+combine-as-imports = true
+
+[tool.ruff.pyupgrade]
+keep-runtime-typing = true
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["D104", "D103", "ANN001"] # Ignore missing docstrings
+"tests/*.py" = ["S101", "D103"] # Ignore use of assert and missing docstrings
+"necoarc/checks.py" = ["ANN401"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.ruff.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10
+
+[tool.ruff.flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "double"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
