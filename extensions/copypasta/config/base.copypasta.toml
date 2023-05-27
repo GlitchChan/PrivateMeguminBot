@@ -1,0 +1,65 @@
+# ======================================================
+#                   🍝Base Copypastas🍝
+#                     ⚠️Do Not Edit⚠️
+# ======================================================
+
+[pumpkin]
+re = "(^pumpkins?$)"
+text = '''
+A man with a giant pumpkin for a head walks up to his friend...
+The friend says, "My God! What happened to your head!?"
+"Well," says the man, "I found a genie in lamp who granted me three wishes."
+"What did you wish for?" says the friend.
+"For the first one I wished for a hundred million dollars, and I got it!"
+"And the second?"
+"For the second wish I asked for the most beautiful woman in the world," says the man, "and I got her too."
+"The third wish?"
+"The third wish is where I really messed up..." says the man.
+"What went wrong?!" says the friend.
+"Well," says the man, "I wished for a giant pumpkin head! 🎃"
+'''
+emoji = ""
+file = ""
+
+[megsugaki]
+re = "(mesugaki|💢+)"
+text = "💢 Hmm... damn bratty girl ...! !! ! Seducing an adult 💢💢💢💢💢 correction is needed...💢"
+emoji = ""
+file = ""
+
+[cunny]
+re = "(^😭+$)?c+u+n+y+"
+text = "😭 Uohhhhhh !!!! Cunny erotic !!!!!!! Cunny belly and chest !!!!! erotic... 😭😭😭"
+emoji = "😭"
+file = ""
+
+[pancakes]
+re = "^(?:(?:dude\\s?|pancakes?)\\s?(?:pancakes?)?(?:\\slmao)?)|🥞$"
+text = "🥞 Pancakes LMAO"
+emoji = "🥞"
+file = ""
+
+[yuck]
+re = "(k[o|\\*]rean?|femboy|rusk)"
+text = ""
+emoji = "<:puke:1093660950638379119>"
+file = ""
+
+[forgor]
+re = "(forgor)"
+text = ""
+emoji = ""
+file = "forgor.png"
+
+[cumzone]
+re = "(^c+u+m+$|^cum\\s?zone$|^🥛+$)"
+text = '''
+Welcum to the cum zone🥛🥛
+Only cum inside anime girls😭
+Quivering Clit, double jointed pussy😻
+Fresh balls⚽⚽
+Elegent ejaculation💦💦
+First the kiss💋, then the cum🥛🥛
+'''
+emoji = ""
+file = ""

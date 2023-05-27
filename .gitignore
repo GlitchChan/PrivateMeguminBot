@@ -133,6 +133,9 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+# ruff
+.ruff_cache/
+
 # Pyre type checker
 .pyre/
 
@@ -143,3 +146,6 @@ dmypy.json
 cython_debug/
 
 .config.py
+
+# Ignore dynaconf secret files
+.secrets.*
