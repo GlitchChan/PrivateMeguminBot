@@ -48,7 +48,9 @@ async def on_startup() -> None:
     username = f"{bot.user.display_name}#{bot.user.discriminator}"
     bot.log.info(f"🌐 Logged into: {username}")
     bot.log.info(f"🔌 Connected to: {guilds} Guild{'s' if guilds > 1 else ''}")
-    bot.log.info(f"🔗 Invite link: https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&permissions=8&scope=bot")
+    bot.log.info(
+        f"🔗 Invite link: https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&permissions=8&scope=bot"
+    )
     bot.log.debug("⚙️ Developer mode is active, this is a reminder!")
 
 

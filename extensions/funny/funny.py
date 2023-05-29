@@ -24,22 +24,13 @@ from interactions import (
 )
 from petpetgif import petpet  # type:ignore[import]
 
-from necoarc import get_confession_channel, has_permission, set_confession_channel, toggle_confessions
+from necoarc import get_confession_channel, has_permission, set_confession_channel
 
 # TODO: Add a random chance for an uwuified lolcat bible quote on message.
 
+
 class Funny(Extension):
     """Extension all about fun!"""
-
-    @slash_command("toggle_confessions", description="Enabled/Disable confession system")
-    @slash_option("toggle", description="Enable or Disable", opt_type=OptionType.BOOLEAN, required=True)
-    @check(guild_only())
-    @check(has_permission(Permissions.MANAGE_CHANNELS))
-    @no_type_check
-    async def command_toggle_confess(self, ctx: InteractionContext, toggle: bool) -> Message:
-        """Toggle confessions."""
-        await toggle_confessions(ctx.guild_id, toggle)
-        return await ctx.send(f"🤫 Successfully {'enabled' if toggle else 'disabled'} confessions.", ephemeral=True)
 
     @slash_command("set_confess_channel", description="Set the confession channel for the server")
     @slash_option("channel", description="Name of the channel to set", opt_type=OptionType.CHANNEL, required=True)

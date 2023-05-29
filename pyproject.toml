@@ -117,9 +117,6 @@ select = [
 force-wrap-aliases = true
 combine-as-imports = true
 
-[tool.ruff.pyupgrade]
-keep-runtime-typing = true
-
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["D104", "D103", "ANN001"] # Ignore missing docstrings
 "tests/*.py" = ["S101", "D103"] # Ignore use of assert and missing docstrings
