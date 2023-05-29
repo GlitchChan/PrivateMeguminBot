@@ -31,7 +31,7 @@ def init_loggers(verbose: bool | None = None) -> None:
     """
     log.remove()
     log.add(
-        "./logs/tools.log",
+        Path(__file__).parent / "logs/necoarc.log",
         backtrace=True,
         enqueue=True,
         diagnose=True,
@@ -46,10 +46,10 @@ async def on_startup() -> None:
     """Even triggered on startup."""
     guilds = len(bot.guilds)
     username = f"{bot.user.display_name}#{bot.user.discriminator}"
-    log.info(f"🌐 Logged into: {username}")
-    log.info(f"🔌 Connected to: {guilds} Guild{'s' if guilds > 1 else ''}")
-    log.info(f"🔗 Invite link: https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&permissions=8&scope=bot")
-    log.debug("⚙️ Developer mode is active, this is a reminder!")
+    bot.log.info(f"🌐 Logged into: {username}")
+    bot.log.info(f"🔌 Connected to: {guilds} Guild{'s' if guilds > 1 else ''}")
+    bot.log.info(f"🔗 Invite link: https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&permissions=8&scope=bot")
+    bot.log.debug("⚙️ Developer mode is active, this is a reminder!")
 
 
 @log.catch(message="🚨 An unexpected error occurred! 🚨")
@@ -60,27 +60,31 @@ def run() -> None:
 
     # Setup custom loggers
     init_loggers(args.verbose)
-    bot.logger = log  # type:ignore[assignment]  # Set custom logger into bot
+    bot.logger = bot.log = log  # type:ignore[assignment]  # Set custom logger into bot
 
     # Load jurigged if devmode
     if args.dev:
         from interactions.ext.jurigged import setup
 
+        bot.log.debug("🔥 Enabled hot reload extension")
         setup(bot)
 
     # Load all bot extensions
     ext_path = Path(__file__).parent / "extensions"
+
     for d in ext_path.iterdir():
-        relative = d.relative_to(Path(__file__).parent)
-        import_path = relative.as_posix().replace("/", ".").replace("\\", ".")
-        try:
-            bot.load_extension(import_path)
-            log.debug(f"✅ Loaded Extension: {d.name}")
-        except ExtensionLoadException:
-            log.warning(f"⚠️ Failed loading Extension: {d.name}")
+        if d.name.startswith("__"):
             continue
 
-    log.success(f"📦 < {len(bot.ext)} > Extensions Loaded!")
+        import_path = d.relative_to(Path(__file__).parent).as_posix().replace(r"\\", ".").replace("/", ".")
+        try:
+            bot.load_extension(import_path)
+            bot.log.debug(f"✅ Loaded Extension: {d.name}")
+        except ExtensionLoadException:
+            bot.log.warning(f"⚠️ Failed loading Extension: {d.name}")
+            continue
+
+    bot.log.success(f"📦 < {len(bot.ext)} > Extensions Loaded!")
     bot.start(token)  # type:ignore[arg-type]
 
 
