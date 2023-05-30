@@ -62,21 +62,6 @@ async def set_user_sex_count(user_id: int, sex_count: int) -> None:
 # ======================================
 
 
-async def toggle_confessions(guild_id: int, toggle: bool) -> None:
-    """Function to enable confessions in the given guild.
-
-    Args:
-        guild_id: ID of the guild
-        toggle: Enable or Disable
-    """
-    async with prisma as db:
-        await db.server.upsert(
-            where={"id": guild_id},
-            data={"create": {"id": guild_id, "confess_enabled": toggle}, "update": {"confess_enabled": toggle}},
-        )
-        log.debug(f"Successfully enabled confessions for {guild_id}")
-
-
 async def set_confession_channel(guild_id: int, channel_id: int) -> None:
     """Function to set/update the confession channel for a given guild.
 
@@ -90,8 +75,8 @@ async def set_confession_channel(guild_id: int, channel_id: int) -> None:
         await db.server.upsert(
             where={"id": guild_id},
             data={
-                "create": {"id": guild_id, "confess_channel": channel_id, "confess_enabled": True},
-                "update": {"confess_channel": channel_id, "confess_enabled": True},
+                "create": {"id": guild_id, "confess_channel": channel_id},
+                "update": {"confess_channel": channel_id},
             },
         )
         log.debug(f"Successfully set confession channel for {guild_id}")
@@ -110,30 +95,58 @@ async def get_confession_channel(guild_id: int) -> int | None:
         if not guild:
             await db.server.create({"id": guild_id})
             return None
-        if not guild.confess_enabled:
-            return None
         return guild.confess_channel
 
 
 # ======================================
-#             👁️The Logger👁️
+#             😭Cunny Share😭
 # ======================================
-
-
-async def get_log_channel(guild_id: int) -> int | None:
-    """Fetch the logger channel ID.
-
-    Args:
-        guild_id: ID of the guild
-
-    Returns:
-        ID of the logger channel or None
-    """
+async def get_cnuy_channel(guild_id: int) -> int | None:
+    """Function to get the cunny channel for given guild."""
     async with prisma as db:
         guild = await db.server.find_unique(where={"id": guild_id})
         if not guild:
             await db.server.create({"id": guild_id})
             return None
-        if not guild.logging_enabled:
-            return None
-        return guild.logging_channel
+        return guild.cnuy_channel
+
+
+async def set_cnuy_channel(guild_id: int, channel_id: int) -> None:
+    """Function to set/update the confession channel for a given guild.
+
+    Args:
+        guild_id: ID of the guild
+        channel_id: ID of the channel being set/updated
+    Returns:
+        None
+    """
+    async with prisma as db:
+        await db.server.upsert(
+            where={"id": guild_id},
+            data={
+                "create": {"id": guild_id, "cnuy_channel": channel_id},
+                "update": {"cnuy_channel": channel_id},
+            },
+        )
+        log.debug(f"Successfully set cnuy channel for {guild_id}")
+
+
+# # ======================================
+# #             👁️The Logger👁️
+# # ======================================
+#
+#
+# async def get_log_channel(guild_id: int) -> int | None:
+#     """Fetch the logger channel ID.
+#
+#     Args:
+#         guild_id: ID of the guild
+#
+#     Returns:
+#         ID of the logger channel or None
+#     """
+#     async with prisma as db:
+#         guild = await db.server.find_unique(where={"id": guild_id})
+#         if not guild:
+#             await db.server.create({"id": guild_id})
+#         return guild.logging_channel
