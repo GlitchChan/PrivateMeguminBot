@@ -43,7 +43,7 @@ class Copypasta(Extension):
 
         # Copypasta
         for pasta in pastas:
-            if re.match(pasta.re, m.content, re.IGNORECASE):
+            if re.match(pasta.re, m.content):
                 log.debug(f"🍝 Detected pasta: {pasta.name}")
                 file = File(Path(__file__).parent / f"assets/{pasta.file}") if pasta.file else None
                 if pasta.text or pasta.file:

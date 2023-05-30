@@ -19,7 +19,7 @@ class Copyasta:  # type:ignore[no-untyped-def]
     """Class to represent a copypasta."""
 
     name: str = attr.ib()
-    re: str = attr.ib(converter=lambda x: re.compile(x))  # type:ignore[var-annotated]
+    re: str = attr.ib(converter=lambda x: re.compile(x, re.IGNORECASE))  # type:ignore[var-annotated]
     text: str = attr.ib()
     emoji: str = attr.ib(converter=lambda x: PartialEmoji.from_str(x))  # type:ignore[var-annotated]
     file: str = attr.ib()
