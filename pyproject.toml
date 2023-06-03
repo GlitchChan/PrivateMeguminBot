@@ -13,14 +13,14 @@ pet-pet-gif = "^1.0.2"
 loguru = "^0.7.0"
 aiofiles = "^23.1.0"
 humanize = "^4.6.0"
-tomlkit = "^0.11.7"
-discord-py-interactions = {extras = ["speedup", "jurigged"], version = "^5.5.1"}
+tomlkit = "^0.11.8"
+discord-py-interactions = {extras = ["speedup", "jurigged"], version = "^5.6.0"}
 
 [tool.poetry.group.dev]
 optional = true
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.0.270"
-mypy = "^1.2.0"
+mypy = "^1.3.0"
 black = "^23.3.0"
 
 [tool.black]
