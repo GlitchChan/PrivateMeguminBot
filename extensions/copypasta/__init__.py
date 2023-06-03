@@ -1,5 +1,7 @@
+from interactions import Client
+
 from .copypasta import Copypasta
 
 
-def setup(client) -> None:  # type: ignore[no-untyped-def]
+def setup(client: Client) -> None:
     Copypasta(client)

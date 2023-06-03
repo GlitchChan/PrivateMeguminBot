@@ -1,5 +1,7 @@
+from interactions import Client
+
 from .cnuy import Cnuy
 
 
-def setup(client) -> None:  # type: ignore[no-untyped-def]
+def setup(client: Client) -> None:
     Cnuy(client)

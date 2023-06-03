@@ -1,5 +1,7 @@
+from interactions import Client
+
 from .sexboard import Sexboard
 
 
-def setup(client) -> None:  # type: ignore[no-untyped-def]
+def setup(client: Client) -> None:
     Sexboard(client)
