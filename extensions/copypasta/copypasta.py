@@ -37,7 +37,7 @@ class Copypasta(Extension):
     async def _message(self, event: MessageCreate) -> None:
         m = event.message
 
-        # Ingore self and bot message:
+        # Ignore self and bot message:
         if m.author.bot:
             return
 
