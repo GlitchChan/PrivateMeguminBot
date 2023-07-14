@@ -1,7 +1,7 @@
-from interactions import Client
+from necoarc import Necoarc
 
 from .sexboard import Sexboard
 
 
-def setup(client: Client) -> None:
+def setup(client: Necoarc) -> None:
     Sexboard(client)

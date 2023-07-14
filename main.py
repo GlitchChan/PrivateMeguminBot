@@ -3,12 +3,14 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 import tomlkit
-from interactions import Client, Intents, listen
+from interactions import Intents, listen
 from interactions.client.errors import ExtensionLoadException
 from loguru import logger as log
 
+from necoarc import Necoarc
+
 # Setup Interactions bot
-bot = Client(intents=Intents.ALL, auto_defer=True, send_command_tracebacks=False)
+bot = Necoarc(intents=Intents.ALL, auto_defer=True, send_command_tracebacks=False)
 
 # Setup argparse
 parser = ArgumentParser(prog="Neco Arc", description="Private Discord bot for friends.")
@@ -46,12 +48,12 @@ async def on_startup() -> None:
     """Even triggered on startup."""
     guilds = len(bot.guilds)
     username = f"{bot.user.display_name}#{bot.user.discriminator}"
-    bot.log.info(f"🌐 Logged into: {username}")
-    bot.log.info(f"🔌 Connected to: {guilds} Guild{'s' if guilds > 1 else ''}")
-    bot.log.info(
+    bot.logger.info(f"🌐 Logged into: {username}")
+    bot.logger.info(f"🔌 Connected to: {guilds} Guild{'s' if guilds > 1 else ''}")
+    bot.logger.info(
         f"🔗 Invite link: https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&permissions=8&scope=bot"
     )
-    bot.log.debug("⚙️ Developer mode is active, this is a reminder!")
+    bot.logger.debug("⚙️ Developer mode is active, this is a reminder!")
 
 
 @log.catch(message="🚨 An unexpected error occurred! 🚨")
@@ -62,31 +64,30 @@ def run() -> None:
 
     # Setup custom loggers
     init_loggers(args.verbose)
-    bot.logger = bot.log = log  # type:ignore[assignment]  # Set custom logger into bot
 
     # Load jurigged if devmode
     if args.dev:
         from interactions.ext.jurigged import setup
 
-        bot.log.debug("🔥 Enabled hot reload extension")
+        bot.logger.debug("🔥 Enabled hot reload extension")
         setup(bot)
 
     # Load all bot extensions
     ext_path = Path(__file__).parent / "extensions"
 
-    for d in ext_path.iterdir():
+    for d in ext_path.glob("*"):
         if d.name.startswith("__"):
             continue
 
-        import_path = d.relative_to(Path(__file__).parent).as_posix().replace(r"\\", ".").replace("/", ".")
         try:
+            import_path = f"extensions.{d.name}"
             bot.load_extension(import_path)
-            bot.log.debug(f"✅ Loaded Extension: {d.name}")
+            bot.logger.debug(f"✅ Loaded Extension: {d.name}")
         except ExtensionLoadException:
-            bot.log.warning(f"⚠️ Failed loading Extension: {d.name}")
+            bot.logger.warning(f"⚠️ Failed loading Extension: {d.name}")
             continue
 
-    bot.log.success(f"📦 < {len(bot.ext)} > Extensions Loaded!")
+    bot.logger.success(f"📦 < {len(bot.ext)} > Extensions Loaded!")
     bot.start(token)  # type:ignore[arg-type]
 
 

@@ -2,6 +2,7 @@ import random
 from io import BytesIO
 from typing import no_type_check
 
+import anyio.to_thread
 from interactions import (
     Attachment,
     Buckets,
@@ -24,13 +25,30 @@ from interactions import (
 )
 from petpetgif import petpet  # type:ignore[import]
 
-from necoarc import get_confession_channel, has_permission, set_confession_channel
+from necoarc import Necoarc, has_permission
 
 # TODO: Add a random chance for an uwuified lolcat bible quote on message.
 
 
 class Funny(Extension):
     """Extension all about fun!"""
+
+    bot: Necoarc
+
+    async def get_confession_channel(self, guild_id: int) -> int | None:
+        """Function to get the confession channel for a given guild.
+
+        Args:
+            guild_id: ID of the guild
+        Returns:
+            ID of the confession channel or None
+        """
+        async with self.bot.db as db:
+            guild = await db.server.find_unique(where={"id": guild_id})
+            if not guild:
+                await db.server.create({"id": guild_id})
+                return None
+            return guild.confess_channel
 
     @slash_command("set_confess_channel", description="Set the confession channel for the server")
     @slash_option("channel", description="Name of the channel to set", opt_type=OptionType.CHANNEL, required=True)
@@ -42,8 +60,29 @@ class Funny(Extension):
         if not isinstance(channel, GuildText):
             return await ctx.send("💥 Error! Only guild text channels allowed.", ephemeral=True)
 
-        await set_confession_channel(ctx.guild_id, channel.id)
+        async with self.bot.db as db:
+            await db.server.upsert(
+                where={"id": ctx.guild.id},
+                data={
+                    "create": {"id": ctx.guild.id, "confess_channel": channel.id},
+                    "update": {"confess_channel": ctx.guild.id},
+                },
+            )
+            self.bot.logger.debug(f"Successfully set confession channel for {ctx.guild.id}")
         return await ctx.send(f"🤫 Successfully set {channel.name} as the confession channel.", ephemeral=True)
+
+    @slash_command("remove_confess_channel", description="Remove the confession channel")
+    @check(guild_only())
+    @check(has_permission(Permissions.MANAGE_CHANNELS))
+    @no_type_check
+    async def command_remove_confess_channel(self, ctx: InteractionContext) -> Message:
+        """Remove the confess channel."""
+        async with self.bot.db as db:
+            guild = await db.server.find_unique(where={"id": ctx.guild.id})
+            if not guild:
+                return await ctx.send("💥 Theres no confess channel for this server.", ephemeral=True)
+            await db.server.update(data={"confess_channel": 0}, where={"id": ctx.guild.id})
+        return await ctx.send("✅ Successfully removed confess channel.", ephemeral=True)
 
     @slash_command("confess", description="Confess your sins")
     @slash_option("text", description="Your confession", opt_type=OptionType.STRING, required=True)
@@ -61,7 +100,7 @@ class Funny(Extension):
                 ephemeral=True,
             )
 
-        channel = await get_confession_channel(ctx.guild_id if isinstance(ctx.channel, GuildText) else guild_id)
+        channel = await self.get_confession_channel(ctx.guild_id if isinstance(ctx.channel, GuildText) else guild_id)
         if not channel:
             return await ctx.send(f"💥 Error! Guild {ctx.guild.name} doesn't have confessions enabled.", ephemeral=True)
 
@@ -80,7 +119,7 @@ class Funny(Extension):
         """Pet a user."""
         source = BytesIO(await user.avatar.fetch())
         dest = BytesIO()
-        petpet.make(source, dest)
+        await anyio.to_thread.run_sync(petpet.make, source, dest)
         dest.seek(0)
 
         petgif = File(file=dest, file_name="petpet.gif")
@@ -94,7 +133,7 @@ class Funny(Extension):
         if len(question) < 5:  # noqa[PLR2004]
             return await ctx.send("🤔 Please ask something longer.")
 
-        random.seed(hash(question))
+        await anyio.to_thread.run_sync(random.seed, hash(question))
 
         responses = [
             "As I see it, yes.",

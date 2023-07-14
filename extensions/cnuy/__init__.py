@@ -1,7 +1,7 @@
-from interactions import Client
+from necoarc import Necoarc
 
 from .cnuy import Cnuy
 
 
-def setup(client: Client) -> None:
+def setup(client: Necoarc) -> None:
     Cnuy(client)

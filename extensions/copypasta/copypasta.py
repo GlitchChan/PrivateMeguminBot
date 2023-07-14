@@ -1,8 +1,7 @@
 import re
-from pathlib import Path
 from typing import no_type_check
 
-import aiofiles
+import anyio
 import httpx
 import tomlkit
 from interactions import (
@@ -43,9 +42,13 @@ class Copypasta(Extension):
 
         # Copypasta
         for pasta in pastas:
-            if re.match(pasta.re, m.content):
+            if await anyio.to_thread.run_sync(re.search, pasta.re, m.content):
                 log.debug(f"🍝 Detected pasta: {pasta.name}")
-                file = File(Path(__file__).parent / f"assets/{pasta.file}") if pasta.file else None
+                file = (
+                    File(anyio.Path(__file__).parent / f"assets/{pasta.file}")  # type: ignore[arg-type]
+                    if pasta.file
+                    else None
+                )
                 if pasta.text or pasta.file:
                     await m.reply(pasta.text if pasta.text else None, file=file)  # type:ignore[arg-type]
                 if pasta.emoji:
@@ -85,9 +88,9 @@ class Copypasta(Extension):
                     res.raise_for_status()
 
                     file_ext = res.headers["content-type"].split("/")[-1]
-                    asset_dir = Path(__file__).parent / "assets"
+                    asset_dir = anyio.Path(__file__).parent / "assets"
 
-                    async with aiofiles.open(f"{asset_dir}/{name}.{file_ext}", "wb") as f:
+                    async with await anyio.open_file(f"{asset_dir}/{name}.{file_ext}", "wb") as f:
                         await f.write(res.content)
 
                         file = f"{name}.{file_ext}"  # type: ignore[assignment]
@@ -149,10 +152,10 @@ class Copypasta(Extension):
                     res.raise_for_status()
 
                     file_ext = res.headers["content-type"].split("/")[-1]
-                    asset_dir = Path(__file__).parent / "assets"
+                    asset_dir = anyio.Path(__file__).parent / "assets"
                     file_name = edited_name if edited_name else name
 
-                    async with aiofiles.open(f"{asset_dir}/{file_name}.{file_ext}", "wb") as f:
+                    async with await anyio.open_file(f"{asset_dir}/{file_name}.{file_ext}", "wb") as f:
                         await f.write(res.content)
 
                     await update_custom_pasta(
@@ -182,10 +185,10 @@ class Copypasta(Extension):
         if user.id in ctx.bot.owner_ids:
             return await ctx.send("💥Error! You're already trusted dummy!")
 
-        _secrets = Path(__file__).parent.parent.parent / ".secrets.toml"
-        toml = tomlkit.parse(_secrets.read_text("utf-8"))
-        toml["necoarc"]["trusted"].append(user.id)
+        _secrets = anyio.Path(__file__).parent.parent.parent / ".secrets.toml"
+        toml = await anyio.to_thread.run_sync(tomlkit.parse, await _secrets.read_text("utf-8"))
+        await anyio.to_thread.run_sync(toml["necoarc"]["trusted"].append, user.id)
 
-        with _secrets.open("w", encoding="utf-8") as t:
-            tomlkit.dump(toml, t)
+        async with _secrets.open("w", encoding="utf-8") as t:
+            await anyio.to_thread.run_sync(tomlkit.dump, toml, t)
             return await ctx.send(f"📝 Successfully added {user.username} to trusted users", ephemeral=True)
