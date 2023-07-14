@@ -49,13 +49,14 @@ class Cnuy(Extension):
     async def check_twitter(self) -> None:
         """Task to check if @glitchy_sus retweeted."""
         async with await anyio.open_file(id_file, "r") as r, await anyio.open_file(
-            id_file, "w"
+            id_file, "r+"
         ) as w, AsyncClient() as c:
             self.bot.logger.debug("🐦 Checking Glitchy's twitter")
             last_id = await r.read()
             data = await c.get(url)
             xml = await anyio.to_thread.run_sync(ElementTree.fromstring, data.text)
-            new_latest_id = xml.find("channel/item/link").text.split("/")[-1].strip("#m")  # type: ignore[union-attr]
+            latest_id = await anyio.to_thread.run_sync(xml.find, "channel/item/link")
+            new_latest_id = latest_id.text.split("/")[-1].strip("#m")  # type: ignore[union-attr]
 
             await w.write(new_latest_id)
 
