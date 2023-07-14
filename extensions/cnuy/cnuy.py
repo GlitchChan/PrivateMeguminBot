@@ -48,17 +48,15 @@ class Cnuy(Extension):
     @Task.create(IntervalTrigger(minutes=30))
     async def check_twitter(self) -> None:
         """Task to check if @glitchy_sus retweeted."""
-        async with await anyio.open_file(id_file, "r") as r, await anyio.open_file(
-            id_file, "r+"
-        ) as w, AsyncClient() as c:
+        async with await anyio.open_file(id_file, "r+") as f, AsyncClient() as c:
             self.bot.logger.debug("🐦 Checking Glitchy's twitter")
-            last_id = await r.read()
+            last_id = await f.read()
             data = await c.get(url)
             xml = await anyio.to_thread.run_sync(ElementTree.fromstring, data.text)
             latest_id = await anyio.to_thread.run_sync(xml.find, "channel/item/link")
             new_latest_id = latest_id.text.split("/")[-1].strip("#m")  # type: ignore[union-attr]
 
-            await w.write(new_latest_id)
+            await f.write(new_latest_id)
 
             message = "😭 Glitchy just retweeted cunny! 😭\n"
 
