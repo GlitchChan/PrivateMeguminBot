@@ -1,8 +1,8 @@
-from pathlib import Path
-from typing import no_type_check
+from typing import Any, no_type_check
 from xml.etree import ElementTree
 
 import anyio
+import tomlkit
 from httpx import AsyncClient
 from interactions import (
     Buckets,
@@ -24,11 +24,10 @@ from interactions import (
 
 from necoarc import Necoarc, has_permission
 
-id_file = Path(__file__).parent / "last_id"
-url = "https://nitter.privacydev.net/glitchy_sus/rss"
-
-if not id_file.exists():
-    open(id_file, "w").close()  # noqa[SIM115]
+ID_FILE = anyio.Path(__file__).parent / "last_id.toml"
+URL = "https://nitter.privacydev.net/glitchy_sus/rss"
+NITTER = "nitter.privacydev.net"
+TWITFIX = "vxtwitter.com"
 
 
 class Cnuy(Extension):
@@ -45,39 +44,51 @@ class Cnuy(Extension):
                 return None
             return guild.cnuy_channel
 
+    async def get_twitter_links(self, xml: ElementTree.Element, last_id: Any) -> list[str]:  # noqa[ANN401]
+        """Function to fetch nitter links."""
+        links: list[str] = []
+
+        for i in await anyio.to_thread.run_sync(xml.findall, "channel/item"):
+            link = await anyio.to_thread.run_sync(i.find, "link")
+            if "RT by" in i.find("title").text:  # type: ignore[union-attr, operator]
+                new_link = link.text.replace(NITTER, TWITFIX).strip("#m")  # type: ignore[union-attr]
+                if new_link.split("/")[-1] == last_id:
+                    return links
+                links.append(new_link)
+        return links
+
     @Task.create(IntervalTrigger(minutes=30))
     async def check_twitter(self) -> None:
         """Task to check if @glitchy_sus retweeted."""
-        async with await anyio.open_file(id_file, "r+") as f, AsyncClient() as c:
+        if not await ID_FILE.exists():
+            base_toml = await anyio.to_thread.run_sync(tomlkit.dumps, {"id": "0"})
+            await ID_FILE.write_text(base_toml)
+
+        async with AsyncClient() as c:
             self.bot.logger.debug("🐦 Checking Glitchy's twitter")
-            last_id = await f.read()
-            data = await c.get(url)
+            toml = await anyio.to_thread.run_sync(tomlkit.parse, await ID_FILE.read_text())
+            data = await c.get(URL)
             xml = await anyio.to_thread.run_sync(ElementTree.fromstring, data.text)
-            latest_id = await anyio.to_thread.run_sync(xml.find, "channel/item/link")
-            new_latest_id = latest_id.text.split("/")[-1].strip("#m")  # type: ignore[union-attr]
 
-            await f.write(new_latest_id)
+            last_id = toml["id"]
+            new_id = await anyio.to_thread.run_sync(xml.find, "channel/item/link")
+            new_last_id = new_id.text.split("/")[-1].strip("#m")  # type: ignore[union-attr]
 
-            message = "😭 Glitchy just retweeted cunny! 😭\n"
+            toml["id"] = new_last_id
+            new_toml = await anyio.to_thread.run_sync(tomlkit.dumps, toml)
+            await ID_FILE.write_text(new_toml)
+            links = await self.get_twitter_links(xml, last_id)
 
-            for i in await anyio.to_thread.run_sync(xml.findall, "channel/item"):
-                if "RT by" in i.find("title").text:  # type: ignore[union-attr, operator]
-                    link = await anyio.to_thread.run_sync(i.find, "link")
-                    new_link = link.text.replace(  # type:ignore[union-attr]
-                        "nitter.privacydev.net", "vxtwitter.com"
-                    ).strip("#m")
+            if links:
+                message = "😭 Glitchy just retweeted cunny! 😭\n"
+                message += "\n".join(links)
 
-                    if new_link.split("/")[-1] == last_id:
-                        return
+                for g in self.bot.guilds:
+                    channel_id = await self.get_cnuy_channel(g.id)
 
-                    message += f"{new_link}\n"
-
-            for g in self.bot.guilds:
-                channel_id = await self.get_cnuy_channel(g.id)
-
-                if channel_id:
-                    self.bot.logger.debug("📩 Sending cunny to server")
-                    await self.bot.get_channel(channel_id).send(message)  # type:ignore[union-attr]
+                    if channel_id:
+                        self.bot.logger.debug("📩 Sending cunny to server")
+                        await self.bot.get_channel(channel_id).send(message)  # type:ignore[union-attr]
 
     @listen()
     async def on_startup(self) -> None:
