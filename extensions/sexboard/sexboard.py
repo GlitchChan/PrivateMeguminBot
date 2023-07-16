@@ -1,5 +1,6 @@
 import re
 
+import prisma
 from humanize import intcomma, metric
 from interactions import (
     Buckets,
@@ -43,13 +44,16 @@ class Sexboard(Extension):
             log.debug("🔥 Detected sex!")
 
             async with self.bot.db as db:
-                await db.user.upsert(
-                    where={"id": m.author.id},
-                    data={"create": {"id": m.author.id}, "update": {"sex_count": {"increment": 1}}},
-                )
-                log.debug(f"⬆️ Successfully updated {m.author.username}'s sex_count")
+                try:
+                    await db.user.upsert(
+                        where={"id": m.author.id},
+                        data={"create": {"id": m.author.id}, "update": {"sex_count": {"increment": 1}}},
+                    )
+                    log.debug(f"⬆️ Successfully updated {m.author.username}'s sex_count")
+                except PrismaError:
+                    pass
 
-    async def get_sex_leaderboard(self) -> list[User] | None:
+    async def get_sex_leaderboard(self) -> list[prisma.models.User] | None:
         """Get the top 10 of the sex message leaderboard.
 
         Returns:
@@ -73,17 +77,17 @@ class Sexboard(Extension):
 
         leaderboard = []
         for idx, u in enumerate(users):
-            name = ctx.bot.get_user(u.id).username  # type:ignore[union-attr]
+            user = await ctx.bot.fetch_user(u.id, force=True)
             count = metric(u.sex_count) if not raw else intcomma(u.sex_count)
             match idx:
                 case 0:
-                    leaderboard.append(f"👑 {name} - {count}")
+                    leaderboard.append(f"👑 {user.username} - {count}")  # type:ignore[union-attr]
                 case 1:
-                    leaderboard.append(f"🥈 {name} - {count}")
+                    leaderboard.append(f"🥈 {user.username} - {count}")  # type:ignore[union-attr]
                 case 2:
-                    leaderboard.append(f"🥉 {name} - {count}")
+                    leaderboard.append(f"🥉 {user.username} - {count}")  # type:ignore[union-attr]
                 case _:
-                    leaderboard.append(f"{name} - {count}")
+                    leaderboard.append(f"{user.username} - {count}")  # type:ignore[union-attr]
 
         e = Embed("🔥Sexboard Leaderboard🔥", description=" \n".join(i for i in leaderboard))
         return await ctx.send(embeds=[e])
