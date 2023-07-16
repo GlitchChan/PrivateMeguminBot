@@ -81,13 +81,13 @@ class Sexboard(Extension):
             count = metric(u.sex_count) if not raw else intcomma(u.sex_count)
             match idx:
                 case 0:
-                    leaderboard.append(f"👑 {user.username} - {count}")  # type:ignore[union-attr]
+                    leaderboard.append(f"👑 {user.display_name} - {count}")  # type:ignore[union-attr]
                 case 1:
-                    leaderboard.append(f"🥈 {user.username} - {count}")  # type:ignore[union-attr]
+                    leaderboard.append(f"🥈 {user.display_name} - {count}")  # type:ignore[union-attr]
                 case 2:
-                    leaderboard.append(f"🥉 {user.username} - {count}")  # type:ignore[union-attr]
+                    leaderboard.append(f"🥉 {user.display_name} - {count}")  # type:ignore[union-attr]
                 case _:
-                    leaderboard.append(f"{user.username} - {count}")  # type:ignore[union-attr]
+                    leaderboard.append(f"{user.display_name} - {count}")  # type:ignore[union-attr]
 
         e = Embed("🔥Sexboard Leaderboard🔥", description=" \n".join(i for i in leaderboard))
         return await ctx.send(embeds=[e])
