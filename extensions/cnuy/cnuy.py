@@ -1,9 +1,8 @@
 from typing import Any, no_type_check
-from xml.etree import ElementTree
 
 import anyio
 import tomlkit
-from httpx import AsyncClient
+from httpx import AsyncClient, Headers
 from interactions import (
     Buckets,
     Extension,
@@ -21,12 +20,14 @@ from interactions import (
     slash_command,
     slash_option,
 )
+from lxml import etree
 
 from necoarc import Necoarc, has_permission
 
 ID_FILE = anyio.Path(__file__).parent / "last_id.toml"
-URL = "https://nitter.privacydev.net/glitchy_sus/rss"
-NITTER = "nitter.privacydev.net"
+URL = "https://tweet.whateveritworks.org/glitchy_sus/rss"
+HEADERS = Headers({"User-Agent": "Mozilla/5.0 (Windows NT 6.2; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0"})
+NITTER = "tweet.whateveritworks.org"
 TWITFIX = "vxtwitter.com"
 
 
@@ -44,13 +45,13 @@ class Cnuy(Extension):
                 return None
             return guild.cnuy_channel
 
-    async def get_twitter_links(self, xml: ElementTree.Element, last_id: Any) -> list[str]:  # noqa[ANN401]
+    async def get_twitter_links(self, xml: etree._Element, last_id: Any) -> list[str]:  # noqa[ANN401]
         """Function to fetch nitter links."""
         links: list[str] = []
 
         for i in await anyio.to_thread.run_sync(xml.findall, "channel/item"):
             link = await anyio.to_thread.run_sync(i.find, "link")
-            if "RT by" in i.find("title").text:  # type: ignore[union-attr, operator]
+            if "RT by" in i.find("title").text:  # type: ignore[union-attr,operator]
                 new_link = link.text.replace(NITTER, TWITFIX).strip("#m")  # type: ignore[union-attr]
                 if new_link.split("/")[-1] == last_id:
                     return links
@@ -64,11 +65,11 @@ class Cnuy(Extension):
             base_toml = await anyio.to_thread.run_sync(tomlkit.dumps, {"id": "0"})
             await ID_FILE.write_text(base_toml)
 
-        async with AsyncClient() as c:
+        async with AsyncClient(headers=HEADERS) as c:
             self.bot.logger.debug("🐦 Checking Glitchy's twitter")
             toml = await anyio.to_thread.run_sync(tomlkit.parse, await ID_FILE.read_text())
             data = await c.get(URL)
-            xml = await anyio.to_thread.run_sync(ElementTree.fromstring, data.text)
+            xml = await anyio.to_thread.run_sync(etree.fromstring, data.content)
 
             last_id = toml["id"]
             new_id = await anyio.to_thread.run_sync(xml.find, "channel/item/link")

@@ -15,6 +15,7 @@ aiofiles = "^23.1.0"
 humanize = "^4.6.0"
 tomlkit = "^0.11.8"
 discord-py-interactions = {extras = ["speedup", "jurigged"], version = "^5.6.0"}
+lxml = "^4.9.3"
 
 [tool.poetry.group.dev]
 optional = true
