@@ -21,6 +21,7 @@ from interactions import (
     slash_option,
 )
 from lxml import etree
+from prisma.types import ServerCreateInput
 
 from necoarc import Necoarc, has_permission
 
@@ -41,7 +42,7 @@ class Cnuy(Extension):
         async with self.bot.db as db:
             guild = await db.server.find_unique(where={"id": guild_id})
             if not guild:
-                await db.server.create({"id": guild_id})
+                await db.server.create(ServerCreateInput(id=guild_id))
                 return None
             return guild.cnuy_channel
 

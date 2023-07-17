@@ -1,5 +1,6 @@
 import re
 
+import anyio
 import prisma
 from humanize import intcomma, metric
 from interactions import (
@@ -21,6 +22,7 @@ from interactions import (
 from interactions.api.events.discord import MessageCreate
 from loguru import logger as log
 from prisma.errors import PrismaError
+from prisma.types import UserCreateInput
 
 from necoarc import Necoarc
 
@@ -47,7 +49,7 @@ class Sexboard(Extension):
                 try:
                     await db.user.upsert(
                         where={"id": m.author.id},
-                        data={"create": {"id": m.author.id}, "update": {"sex_count": {"increment": 1}}},
+                        data={"create": UserCreateInput(id=m.author.id), "update": {"sex_count": {"increment": 1}}},
                     )
                     log.debug(f"⬆️ Successfully updated {m.author.username}'s sex_count")
                 except PrismaError:
@@ -89,8 +91,12 @@ class Sexboard(Extension):
                 case _:
                     leaderboard.append(f"{user.display_name} - {count}")  # type:ignore[union-attr]
 
-        e = Embed("🔥Sexboard Leaderboard🔥", description=" \n".join(i for i in leaderboard))
-        return await ctx.send(embeds=[e])
+        embed_file = anyio.Path(__file__).parent / "../banner.png"
+        self.bot.logger.debug(await embed_file.resolve())
+
+        embed = Embed("🔥Sexboard Leaderboard🔥", description=" \n".join(i for i in leaderboard))
+        embed.set_image(f"attachment://{embed_file}")
+        return await ctx.send(embeds=[embed])
 
     @slash_command("set_sex_number", description="Sets a users sex count")
     @slash_option("user", "User to update", OptionType.USER, required=True)
@@ -101,7 +107,7 @@ class Sexboard(Extension):
         async with self.bot.db as db:
             await db.user.upsert(
                 where={"id": user.id},
-                data={"create": {"id": user.id, "sex_count": count}, "update": {"sex_count": count}},
+                data={"create": UserCreateInput(id=user.id, sex_count=count), "update": {"sex_count": count}},
             )
             log.debug(f"📝 Successfully updated {user.id} sex_count")
 

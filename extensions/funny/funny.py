@@ -24,6 +24,7 @@ from interactions import (
     slash_option,
 )
 from petpetgif import petpet  # type:ignore[import]
+from prisma.types import ServerCreateInput
 
 from necoarc import Necoarc, has_permission
 
@@ -46,7 +47,7 @@ class Funny(Extension):
         async with self.bot.db as db:
             guild = await db.server.find_unique(where={"id": guild_id})
             if not guild:
-                await db.server.create({"id": guild_id})
+                await db.server.create(ServerCreateInput(id=guild_id))
                 return None
             return guild.confess_channel
 
@@ -64,7 +65,7 @@ class Funny(Extension):
             await db.server.upsert(
                 where={"id": ctx.guild.id},
                 data={
-                    "create": {"id": ctx.guild.id, "confess_channel": channel.id},
+                    "create": ServerCreateInput(id=ctx.guild.id, confess_channel=channel.id),
                     "update": {"confess_channel": ctx.guild.id},
                 },
             )
