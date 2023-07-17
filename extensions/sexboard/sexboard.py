@@ -6,8 +6,10 @@ from humanize import intcomma, metric
 from interactions import (
     Buckets,
     ChannelType,
+    Color,
     Embed,
     Extension,
+    File,
     InteractionContext,
     Message,
     OptionType,
@@ -87,16 +89,18 @@ class Sexboard(Extension):
                 case 1:
                     leaderboard.append(f"🥈 {user.display_name} - {count}")  # type:ignore[union-attr]
                 case 2:
-                    leaderboard.append(f"🥉 {user.display_name} - {count}")  # type:ignore[union-attr]
+                    leaderboard.append(f"🥉 {user.display_name} - {count}\n")  # type:ignore[union-attr]
                 case _:
                     leaderboard.append(f"{user.display_name} - {count}")  # type:ignore[union-attr]
 
-        embed_file = anyio.Path(__file__).parent / "../banner.png"
-        self.bot.logger.debug(await embed_file.resolve())
+        banner_file = anyio.Path(__file__).parent / "banner.png"
+        embed_file = File(banner_file, file_name="banner.png")  # type:ignore[arg-type]
 
-        embed = Embed("🔥Sexboard Leaderboard🔥", description=" \n".join(i for i in leaderboard))
-        embed.set_image(f"attachment://{embed_file}")
-        return await ctx.send(embeds=[embed])
+        banner = Embed("🔥Sexboard Leaderboard🔥", color=Color.from_hex("#e9d0a4"))
+        banner.set_image("attachment://banner.png")
+        list_emb = Embed(description=" \n".join(leaderboard), color=Color.from_hex("#e9d0a4"))
+        list_emb.set_footer("Sexboard icon by: @tsunemiukiyo")
+        return await ctx.send(embeds=[banner, list_emb], files=embed_file)
 
     @slash_command("set_sex_number", description="Sets a users sex count")
     @slash_option("user", "User to update", OptionType.USER, required=True)
