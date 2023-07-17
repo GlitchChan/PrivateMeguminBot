@@ -6,6 +6,7 @@ import anyio.to_thread
 from interactions import (
     Attachment,
     Buckets,
+    ChannelType,
     Color,
     Embed,
     Extension,
@@ -52,7 +53,13 @@ class Funny(Extension):
             return guild.confess_channel
 
     @slash_command("set_confess_channel", description="Set the confession channel for the server")
-    @slash_option("channel", description="Name of the channel to set", opt_type=OptionType.CHANNEL, required=True)
+    @slash_option(
+        "channel",
+        description="Name of the channel to set",
+        opt_type=OptionType.CHANNEL,
+        required=True,
+        channel_types=[ChannelType.GUILD_TEXT],
+    )
     @check(guild_only())
     @check(has_permission(Permissions.MANAGE_CHANNELS))
     @no_type_check

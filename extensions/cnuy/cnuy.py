@@ -5,6 +5,7 @@ import tomlkit
 from httpx import AsyncClient, Headers
 from interactions import (
     Buckets,
+    ChannelType,
     Extension,
     GuildText,
     InteractionContext,
@@ -98,7 +99,13 @@ class Cnuy(Extension):
         self.check_twitter.start()
 
     @slash_command("set_cnuy_channel", description="Set the cunny posting channel for the server")
-    @slash_option("channel", description="Name of the channel to set", opt_type=OptionType.CHANNEL, required=True)
+    @slash_option(
+        "channel",
+        description="Name of the channel to set",
+        opt_type=OptionType.CHANNEL,
+        required=True,
+        channel_types=[ChannelType.GUILD_TEXT],
+    )
     @check(guild_only())
     @check(has_permission(Permissions.MANAGE_CHANNELS))
     @no_type_check
@@ -111,7 +118,7 @@ class Cnuy(Extension):
             await db.server.upsert(
                 where={"id": ctx.guild.id},
                 data={
-                    "create": {"id": ctx.guild.id, "confess_channel": channel.id},
+                    "create": ServerCreateInput(id=ctx.guild.id, cnuy_channel=channel.id),
                     "update": {"confess_channel": channel.id},
                 },
             )
