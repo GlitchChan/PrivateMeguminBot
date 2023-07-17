@@ -8,13 +8,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-prisma = "^0.8.2"
+prisma = "^0.9.1"
 pet-pet-gif = "^1.0.2"
 loguru = "^0.7.0"
 aiofiles = "^23.1.0"
-humanize = "^4.6.0"
+humanize = "^4.7.0"
 tomlkit = "^0.11.8"
-discord-py-interactions = {extras = ["speedup", "jurigged"], version = "^5.6.0"}
+discord-py-interactions = {extras = ["speedup", "jurigged"], version = "^5.8.0"}
 lxml = "^4.9.3"
 
 [tool.poetry.group.dev]
