@@ -1,4 +1,5 @@
 import re
+from typing import no_type_check
 
 import anyio
 import prisma
@@ -72,6 +73,7 @@ class Sexboard(Extension):
     @slash_command("sexboard", description="Shows the top 10 sex havers")
     @slash_option("raw", description="Removes abbreviations of larger numbers", opt_type=OptionType.BOOLEAN)
     @cooldown(Buckets.GUILD, 1, 3)
+    @no_type_check
     async def command_sexboard(self, ctx: InteractionContext, raw: bool | None = None) -> Message:
         """Command to get top 10 sex havers."""
         users = await self.get_sex_leaderboard()
@@ -85,20 +87,23 @@ class Sexboard(Extension):
             count = metric(u.sex_count) if not raw else intcomma(u.sex_count)
             match idx:
                 case 0:
-                    leaderboard.append(f"👑 {user.display_name} - {count}")  # type:ignore[union-attr]
+                    leaderboard.append(user.display_name)
+                    leaderboard.append(f"👑 {user.display_name} - {count}")
                 case 1:
-                    leaderboard.append(f"🥈 {user.display_name} - {count}")  # type:ignore[union-attr]
+                    leaderboard.append(f"🥈 {user.display_name} - {count}")
                 case 2:
-                    leaderboard.append(f"🥉 {user.display_name} - {count}\n")  # type:ignore[union-attr]
+                    leaderboard.append(f"🥉 {user.display_name} - {count}\n")
                 case _:
-                    leaderboard.append(f"{user.display_name} - {count}")  # type:ignore[union-attr]
+                    leaderboard.append(f"{user.display_name} - {count}")
 
         banner_file = anyio.Path(__file__).parent / "banner.png"
-        embed_file = File(banner_file, file_name="banner.png")  # type:ignore[arg-type]
+        embed_file = File(banner_file, file_name="banner.png")
+        leader = f"👑 {leaderboard[0]} is currently the best sexer"
+        leaderboard.pop(0)
 
-        banner = Embed("🔥Sexboard Leaderboard🔥", color=Color.from_hex("#e9d0a4"))
+        banner = Embed(color=Color.from_hex("#e9d0a4"))
         banner.set_image("attachment://banner.png")
-        list_emb = Embed(description=" \n".join(leaderboard), color=Color.from_hex("#e9d0a4"))
+        list_emb = Embed(title=leader, description=" \n".join(leaderboard), color=Color.from_hex("#e9d0a4"))
         list_emb.set_footer("Sexboard icon by: @tsunemiukiyo")
         return await ctx.send(embeds=[banner, list_emb], files=embed_file)
 
