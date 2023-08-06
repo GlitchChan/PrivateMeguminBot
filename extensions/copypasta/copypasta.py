@@ -189,6 +189,6 @@ class Copypasta(Extension):
         toml = await anyio.to_thread.run_sync(tomlkit.parse, await _secrets.read_text("utf-8"))
         await anyio.to_thread.run_sync(toml["necoarc"]["trusted"].append, user.id)
 
-        async with _secrets.open("w", encoding="utf-8") as t:
+        async with await _secrets.open("w", encoding="utf-8") as t:
             await anyio.to_thread.run_sync(tomlkit.dump, toml, t)
             return await ctx.send(f"📝 Successfully added {user.username} to trusted users", ephemeral=True)
