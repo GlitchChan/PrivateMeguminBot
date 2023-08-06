@@ -83,7 +83,7 @@ class Sexboard(Extension):
 
         leaderboard = []
         for idx, u in enumerate(users):
-            user = await ctx.bot.fetch_user(u.id, force=True)
+            user = await self.bot.fetch_user(u.id, force=True)
             count = metric(u.sex_count) if not raw else intcomma(u.sex_count)
             match idx:
                 case 0:
