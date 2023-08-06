@@ -7,14 +7,15 @@ datasource db {
 // generator
 generator client {
   provider             = "prisma-client-py"
+  interface            = "asyncio"
   recursive_type_depth = 5
 }
 
 // data models
 model Server {
-  id              BigInt @id
-  confess_channel BigInt @default(0)
-  cnuy_channel    BigInt @default(0)
+  id              BigInt  @id
+  confess_channel BigInt?
+  cnuy_channel    BigInt?
 }
 
 model User {
