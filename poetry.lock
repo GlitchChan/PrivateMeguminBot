@@ -566,6 +566,17 @@ files = [
 ]
 
 [[package]]
+name = "cssselect"
+version = "1.2.0"
+description = "cssselect parses CSS3 Selectors and translates them to XPath 1.0"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "cssselect-1.2.0-py2.py3-none-any.whl", hash = "sha256:da1885f0c10b60c03ed5eccbb6b68d6eff248d91976fcde348f395d54c9fd35e"},
+    {file = "cssselect-1.2.0.tar.gz", hash = "sha256:666b19839cfaddb9ce9d36bfe4c969132c647b92fc9088c4e23f786b30f1b3dc"},
+]
+
+[[package]]
 name = "discord-py-interactions"
 version = "5.8.0"
 description = "Easy, simple, scalable and modular: a Python API wrapper for interactions."
@@ -869,6 +880,17 @@ files = [
 
 [package.dependencies]
 ansicon = {version = "*", markers = "platform_system == \"Windows\""}
+
+[[package]]
+name = "jmespath"
+version = "1.0.1"
+description = "JSON Matching Expressions"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "jmespath-1.0.1-py3-none-any.whl", hash = "sha256:02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980"},
+    {file = "jmespath-1.0.1.tar.gz", hash = "sha256:90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe"},
+]
 
 [[package]]
 name = "jurigged"
@@ -1303,6 +1325,24 @@ files = [
 ]
 
 [[package]]
+name = "parsel"
+version = "1.8.1"
+description = "Parsel is a library to extract data from HTML and XML using XPath and CSS selectors"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "parsel-1.8.1-py2.py3-none-any.whl", hash = "sha256:2708fc74daeeb4ce471e2c2e9089b650ec940c7a218053e57421e69b5b00f82c"},
+    {file = "parsel-1.8.1.tar.gz", hash = "sha256:aff28e68c9b3f1a901db2a4e3f158d8480a38724d7328ee751c1a4e1c1801e39"},
+]
+
+[package.dependencies]
+cssselect = ">=0.9"
+jmespath = "*"
+lxml = "*"
+packaging = "*"
+w3lib = ">=1.19.0"
+
+[[package]]
 name = "pathspec"
 version = "0.11.1"
 description = "Utility library for gitignore style pattern matching of file paths."
@@ -1722,6 +1762,17 @@ docs = ["Sphinx (>=4.1.2,<4.2.0)", "sphinx-rtd-theme (>=0.5.2,<0.6.0)", "sphinxc
 test = ["Cython (>=0.29.32,<0.30.0)", "aiohttp", "flake8 (>=3.9.2,<3.10.0)", "mypy (>=0.800)", "psutil", "pyOpenSSL (>=22.0.0,<22.1.0)", "pycodestyle (>=2.7.0,<2.8.0)"]
 
 [[package]]
+name = "w3lib"
+version = "2.1.2"
+description = "Library of web-related functions"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "w3lib-2.1.2-py3-none-any.whl", hash = "sha256:c4432926e739caa8e3f49f5de783f336df563d9490416aebd5d39fb896d264e7"},
+    {file = "w3lib-2.1.2.tar.gz", hash = "sha256:ed5b74e997eea2abe3c1321f916e344144ee8e9072a6f33463ee8e57f858a4b1"},
+]
+
+[[package]]
 name = "watchdog"
 version = "3.0.0"
 description = "Filesystem events monitoring"
@@ -1875,4 +1926,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "c8de1a03cfde4407e3d11042e141068f8634661a53bceb2c8078a9eaca18db46"
+content-hash = "1772ee0d8bedd4e5b4057d6ce368e55d235112726d365103b5dc658943fe6f8c"
