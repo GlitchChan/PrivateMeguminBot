@@ -1,7 +1,6 @@
-from typing import Any, no_type_check
+from typing import no_type_check
 
 import anyio
-import tomlkit
 from httpx import AsyncClient, Headers
 from interactions import (
     Buckets,
@@ -21,12 +20,12 @@ from interactions import (
     slash_command,
     slash_option,
 )
-from lxml import etree
+from parsel import Selector
 from prisma.types import ServerCreateInput
 
 from necoarc import Necoarc, has_permission
 
-ID_FILE = anyio.Path(__file__).parent / "last_id.toml"
+ID_FILE = anyio.Path(__file__).parent / "last_id"
 URL = "https://tweet.whateveritworks.org/glitchy_sus/rss"
 HEADERS = Headers({"User-Agent": "Mozilla/5.0 (Windows NT 6.2; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0"})
 NITTER = "tweet.whateveritworks.org"
@@ -47,51 +46,48 @@ class Cnuy(Extension):
                 return None
             return guild.cnuy_channel
 
-    async def get_twitter_links(self, xml: etree._Element, last_id: Any) -> list[str]:  # noqa[ANN401]
-        """Function to fetch nitter links."""
-        links: list[str] = []
-
-        for i in await anyio.to_thread.run_sync(xml.findall, "channel/item"):
-            link = await anyio.to_thread.run_sync(i.find, "link")
-            if "RT by" in i.find("title").text:  # type: ignore[union-attr,operator]
-                new_link = link.text.replace(NITTER, TWITFIX).strip("#m")  # type: ignore[union-attr]
-                if new_link.split("/")[-1] == last_id:
-                    return links
-                links.append(new_link)
-        return links
-
     @Task.create(IntervalTrigger(minutes=30))
     async def check_twitter(self) -> None:
         """Task to check if @glitchy_sus retweeted."""
         if not await ID_FILE.exists():
-            base_toml = await anyio.to_thread.run_sync(tomlkit.dumps, {"id": "0"})
-            await ID_FILE.write_text(base_toml)
+            self.bot.logger.debug(f"ID file doesn't exist at {ID_FILE}, creating.")
+            await ID_FILE.write_text("*")
 
         async with AsyncClient(headers=HEADERS) as c:
             self.bot.logger.debug("🐦 Checking Glitchy's twitter")
-            toml = await anyio.to_thread.run_sync(tomlkit.parse, await ID_FILE.read_text())
             data = await c.get(URL)
-            xml = await anyio.to_thread.run_sync(etree.fromstring, data.content)
+            xml = Selector(data.text, type="xml")
 
-            last_id = toml["id"]
-            new_id = await anyio.to_thread.run_sync(xml.find, "channel/item/link")
-            new_last_id = new_id.text.split("/")[-1].strip("#m")  # type: ignore[union-attr]
+            last_id = await ID_FILE.read_text()
+            new_last_id = await anyio.to_thread.run_sync(xml.xpath, "//item/link/text()")
 
-            toml["id"] = new_last_id
-            new_toml = await anyio.to_thread.run_sync(tomlkit.dumps, toml)
-            await ID_FILE.write_text(new_toml)
-            links = await self.get_twitter_links(xml, last_id)
+            if last_id not in new_last_id.get():
+                self.bot.logger.debug("🐦 New tweets detected")
 
-            if links:
-                message = "😭 Glitchy just retweeted cunny! 😭\n"
-                message += "\n".join(links)
+                def get_tweets(xml: Selector) -> str:
+                    message = "😭 Glitchy Retweeted Cunny 😭\n"
+                    for t in xml.xpath("//item"):
+                        link = t.xpath(".//link/text()").get()
+                        if last_id in link:
+                            break
+                        if "RT by" in t.xpath(".//title/text()").get():
+                            message += f"{t.xpath('.//link/text()').get().replace(NITTER, TWITFIX).strip('#m')}\n"
+                    return message
 
-                for g in self.bot.guilds:
-                    channel_id = await self.get_cnuy_channel(g.id)
+                message = await anyio.to_thread.run_sync(get_tweets, xml)
+                await ID_FILE.write_text(new_last_id.get().split("/")[-1].strip("#m"))
 
-                    if channel_id:
-                        self.bot.logger.debug("📩 Sending cunny to server")
-                        await self.bot.get_channel(channel_id).send(message)  # type:ignore[union-attr]
+                if TWITFIX in message:
+                    for g in self.bot.guilds:
+                        channel_id = await self.get_cnuy_channel(g.id)
+
+                        self.bot.logger.debug(f"Getting channel {channel_id}")
+
+                        if channel_id:
+                            self.bot.logger.debug("📩 Sending cunny to server")
+                            channel = self.bot.get_channel(channel_id)
+                            self.bot.logger.debug(f"Sending cunny to {channel}")
+                            await channel.send(message)  # type:ignore[union-attr]
 
     @listen()
     async def on_startup(self) -> None:
@@ -119,7 +115,7 @@ class Cnuy(Extension):
                 where={"id": ctx.guild.id},
                 data={
                     "create": ServerCreateInput(id=ctx.guild.id, cnuy_channel=channel.id),
-                    "update": {"confess_channel": channel.id},
+                    "update": {"cnuy_channel": channel.id},
                 },
             )
             self.bot.logger.debug(f"Successfully set confession channel for {ctx.guild.id}")
