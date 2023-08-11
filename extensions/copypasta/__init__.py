@@ -1,7 +1,7 @@
-from necoarc import Necoarc
+from interactions import Client
 
 from .copypasta import Copypasta
 
 
-def setup(client: Necoarc) -> None:
+def setup(client: Client) -> None:
     Copypasta(client)

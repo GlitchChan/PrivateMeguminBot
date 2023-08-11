@@ -1,7 +1,7 @@
-from necoarc import Necoarc
+from interactions import Client
 
 from .funny import Funny
 
 
-def setup(client: Necoarc) -> None:
+def setup(client: Client) -> None:
     Funny(client)

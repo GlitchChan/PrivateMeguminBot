@@ -2,7 +2,7 @@ import random
 from io import BytesIO
 from typing import no_type_check
 
-import anyio.to_thread
+import anyio
 from interactions import (
     Attachment,
     Buckets,
@@ -24,18 +24,16 @@ from interactions import (
     slash_command,
     slash_option,
 )
-from petpetgif import petpet  # type:ignore[import]
+from petpetgif import petpet
 from prisma.types import ServerCreateInput
 
-from necoarc import Necoarc, has_permission
+from core import DB, has_permission
 
 # TODO: Add a random chance for an uwuified lolcat bible quote on message.
 
 
 class Funny(Extension):
     """Extension all about fun!"""
-
-    bot: Necoarc
 
     async def get_confession_channel(self, guild_id: int) -> int | None:
         """Function to get the confession channel for a given guild.
@@ -45,7 +43,7 @@ class Funny(Extension):
         Returns:
             ID of the confession channel or None
         """
-        async with self.bot.db as db:
+        async with DB as db:
             guild = await db.server.find_unique(where={"id": guild_id})
             if not guild:
                 await db.server.create(ServerCreateInput(id=guild_id))
@@ -68,7 +66,7 @@ class Funny(Extension):
         if not isinstance(channel, GuildText):
             return await ctx.send("💥 Error! Only guild text channels allowed.", ephemeral=True)
 
-        async with self.bot.db as db:
+        async with DB as db:
             await db.server.upsert(
                 where={"id": ctx.guild.id},
                 data={
@@ -85,7 +83,7 @@ class Funny(Extension):
     @no_type_check
     async def command_remove_confess_channel(self, ctx: InteractionContext) -> Message:
         """Remove the confess channel."""
-        async with self.bot.db as db:
+        async with DB as db:
             guild = await db.server.find_unique(where={"id": ctx.guild.id})
             if not guild:
                 return await ctx.send("💥 Theres no confess channel for this server.", ephemeral=True)

@@ -1,95 +1,62 @@
+import os
 import sys
-from argparse import ArgumentParser
+from distutils.util import strtobool
 from pathlib import Path
 
-import tomlkit
-from interactions import Intents, listen
-from interactions.client.errors import ExtensionLoadException
-from loguru import logger as log
+import interactions as ipy
+from dotenv import load_dotenv
 
-from necoarc import Necoarc
+from core import init_logger
 
-# Setup Interactions bot
-bot = Necoarc(intents=Intents.ALL, auto_defer=True, send_command_tracebacks=False)
-
-# Setup argparse
-parser = ArgumentParser(prog="Neco Arc", description="Private Discord bot for friends.")
-parser.add_argument("-d", "--dev", action="store_true")
-parser.add_argument("-v", "--verbose", action="store_true")
-
-secret_file = Path(__file__).parent / ".secrets.toml"
-_secrets = tomlkit.parse(secret_file.read_text("utf-8"))
-base_token = _secrets["discord"]["token"]  # type:ignore[index]
-dev_token = _secrets["discord"]["dev_token"]  # type:ignore[index]
+# Load enviroment
+load_dotenv()
+dev_mode = strtobool(os.getenv("NECOARC_DEV", "False"))
+log = init_logger("necoarc", bool(dev_mode))
+ext_path = Path(__file__).parent / "extensions"
 
 
-def init_loggers(verbose: bool | None = None) -> None:
-    """Custom function to initialize loguru as the default logger.
+# Startup logging
+@ipy.listen(ipy.events.Startup)
+async def _startup(event: ipy.events.Startup) -> None:
+    invite_link = "https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&permissions=8&scope=bot"
 
-    Args:
-        verbose: More logs
-    Returns:
-        None
-    """
-    log.remove()
-    log.add(
-        Path(__file__).parent / "logs/necoarc.log",
-        backtrace=True,
-        enqueue=True,
-        diagnose=True,
-        rotation="12:00",
-        retention="10 days",
+    event.bot.logger.info(f"🏰 Connected to {len(event.bot.guilds)} guilds!")
+    event.bot.logger.info(f"🎁 Invite me: [link={invite_link}]Click me![/link]")
+
+
+# Main function
+def main() -> None:
+    """The main function that loads extensions and runs the bot."""
+    token = os.getenv("DISCORD_DEV_TOKEN", None) if dev_mode else os.getenv("DISCORD_TOKEN", None)
+
+    if not token:
+        log.critical("[bold red]🛑 Discord token not found!")
+        sys.exit(1)
+
+    bot = ipy.Client(
+        token=token,
+        debug_scope=os.getenv("DISCORD_DEV_GUILD") if dev_mode else ipy.MISSING,  # type: ignore[arg-type]
+        logger=log,
+        send_command_tracebacks=False,
+        intents=ipy.Intents.ALL,
     )
-    log.add(sys.stdout, level="DEBUG" if verbose else "INFO", enqueue=True)
 
+    if dev_mode:
+        bot.logger.debug("[bold yellow]🔁 Enabling Jurigged")
+        bot.load_extension("interactions.ext.jurigged")
 
-@listen()
-async def on_startup() -> None:
-    """Even triggered on startup."""
-    guilds = len(bot.guilds)
-    username = f"{bot.user.display_name}#{bot.user.discriminator}"
-    bot.logger.info(f"🌐 Logged into: {username}")
-    bot.logger.info(f"🔌 Connected to: {guilds} Guild{'s' if guilds > 1 else ''}")
-    bot.logger.info(
-        f"🔗 Invite link: https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&permissions=8&scope=bot"
-    )
-    bot.logger.debug("⚙️ Developer mode is active, this is a reminder!")
+    for e in ext_path.glob("*"):
+        if not e.name.startswith("__"):
+            bot.logger.debug(f"📦 Attempting to load {e.name}...")
+            try:
+                bot.load_extension(f"extensions.{e.name}")
+                bot.logger.info(f"[green]✅ Successfully loaded[/green] {e.name}!")
+            except ipy.errors.ExtensionLoadException:
+                bot.logger.warning(f"[yellow]⚠️ Failed to load[/yellow] {e.name}!!!")
 
-
-@log.catch(message="🚨 An unexpected error occurred! 🚨")
-def run() -> None:
-    """Main function to start the bot."""
-    args = parser.parse_args()
-    token = base_token if not args.dev else dev_token  # Fetch discord token
-
-    # Setup custom loggers
-    init_loggers(args.verbose)
-
-    # Load jurigged if devmode
-    if args.dev:
-        from interactions.ext.jurigged import setup
-
-        bot.logger.debug("🔥 Enabled hot reload extension")
-        setup(bot)
-
-    # Load all bot extensions
-    ext_path = Path(__file__).parent / "extensions"
-
-    for d in ext_path.glob("*"):
-        if d.name.startswith("__"):
-            continue
-
-        try:
-            import_path = f"extensions.{d.name}"
-            bot.load_extension(import_path)
-            bot.logger.debug(f"✅ Loaded Extension: {d.name}")
-        except ExtensionLoadException:
-            bot.logger.warning(f"⚠️ Failed loading Extension: {d.name}")
-            continue
-
-    bot.logger.success(f"📦 < {len(bot.ext)} > Extensions Loaded!")
-    bot.start(token)  # type:ignore[arg-type]
+    bot.logger.info(f"🚀 Loaded < {len(bot.ext)} > extensions!")
+    bot.start()
 
 
 if __name__ == "__main__":
-    run()
+    main()

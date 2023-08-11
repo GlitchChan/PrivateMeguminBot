@@ -10,15 +10,14 @@ readme = "README.md"
 python = "^3.11"
 prisma = "^0.9.1"
 pet-pet-gif = "^1.0.2"
-loguru = "^0.7.0"
-aiofiles = "^23.1.0"
 humanize = "^4.7.0"
 tomlkit = "^0.11.8"
 discord-py-interactions = { extras = [
     "speedup",
     "jurigged",
-], version = "^5.8.0" }
+], version = "^5.9.2" }
 parsel = "^1.8.1"
+rich = "^13.5.2"
 
 [tool.poetry.group.dev]
 optional = true
@@ -32,12 +31,12 @@ line-length = 120
 target-version = ["py311"]
 
 [tool.mypy]
-files = ["."]
+files = ["*.py"]
 plugins = "interactions.ext.mypy"
 
-# temporarily ignore some files
+ignore_missing_imports_per_module = true
+ignore_missing_imports = true
 show_error_codes = true
-follow_imports = "silent"
 strict_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true

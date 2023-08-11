@@ -1,23 +1,5 @@
 {
-    "python.terminal.activateEnvInCurrentTerminal": true,
-    "editor.formatOnSave": true,
-    "ruff.args": [
-        "--config=${workspaceFolder}\\pyproject.toml"
-    ],
-    "ruff.run": "onSave",
-    "ruff.organizeImports": true,
-    "mypy-type-checker.args": [
-        "--config-file=${workspaceFolder}\\pyproject.toml"
-    ],
-    "python.languageServer": "Pylance",
-    "python.analysis.autoFormatStrings": true,
-    "python.analysis.autoImportCompletions": true,
-    "python.analysis.completeFunctionParens": true,
-    "python.analysis.typeCheckingMode": "basic",
-    "editor.mouseWheelZoom": true,
-    "editor.fontFamily": "JetBrainsMono Nerd Font",
-    "vscord.status.details.text.idle": "💤 Idling...",
-    "vscord.status.details.text.notInFile": "🤔 Not in a file!",
+    "vscord.status.details.text.editing": "😺NecoArc😺 {problems}",
     "editor.fontLigatures": true,
-    "docwriter.style": "Google"
+    "doki.sticker.css": "z-index:100;background-position:100% 97%;opacity: 0.5",
 }

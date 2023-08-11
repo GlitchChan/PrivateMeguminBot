@@ -21,11 +21,10 @@ from interactions import (
     slash_option,
 )
 from interactions.api.events import MessageCreate
-from loguru import logger as log
 
-from necoarc import is_trusted
+from core import is_trusted
 
-from .config.settings import add_custom_pasta, pastas, remove_copypata, update_custom_pasta
+from .config import add_custom_pasta, pastas, remove_copypata, update_custom_pasta
 from .utils import validate_copypasta
 
 
@@ -42,8 +41,8 @@ class Copypasta(Extension):
 
         # Copypasta
         for pasta in pastas:
-            if await anyio.to_thread.run_sync(re.search, pasta.re, m.content):
-                log.debug(f"🍝 Detected pasta: {pasta.name}")
+            if await anyio.to_thread.run_sync(re.match, pasta.re, m.content):
+                self.bot.logger.debug(f"🍝 Detected pasta: {pasta.name}")
                 file = (
                     File(anyio.Path(__file__).parent / f"assets/{pasta.file}")  # type: ignore[arg-type]
                     if pasta.file
@@ -96,8 +95,7 @@ class Copypasta(Extension):
                         file = f"{name}.{file_ext}"  # type: ignore[assignment]
             except (OSError, httpx.HTTPError) as e:
                 return await ctx.send(f"💥 Error! Failed to get attachemnt with error: {e}", ephemeral=True)
-
-        await add_custom_pasta(name, regex, text, emoji, file)  # type: ignore[arg-type]
+        await anyio.to_thread.run_sync(add_custom_pasta, name, regex, text, emoji, file)
         return await ctx.send(f"🍝 Successfully created {name} copypasta!", ephemeral=True)
 
     @slash_command("remove_copypasta", description="Used to add custom copypastas")
@@ -111,7 +109,7 @@ class Copypasta(Extension):
         if name not in names:
             return await ctx.send("💥 Error! Invalid name, no copypasta exists with this name!", ephemeral=True)
 
-        await remove_copypata(name)
+        await anyio.to_thread.run_sync(remove_copypata, name)
         return await ctx.send(f"🗑️ Successfully removed {name}", ephemeral=True)
 
     @slash_command("edit_copypasta", description="Used to edit custom copypastas")
@@ -148,7 +146,7 @@ class Copypasta(Extension):
             try:
                 async with httpx.AsyncClient() as c:
                     res = await c.get(edited_file.proxy_url)
-                    log.debug(f"📩 Downloading: {edited_file.filename}")
+                    self.bot.logger.debug(f"📥 Downloading: {edited_file.filename}")
                     res.raise_for_status()
 
                     file_ext = res.headers["content-type"].split("/")[-1]
@@ -158,8 +156,14 @@ class Copypasta(Extension):
                     async with await anyio.open_file(f"{asset_dir}/{file_name}.{file_ext}", "wb") as f:
                         await f.write(res.content)
 
-                    await update_custom_pasta(
-                        name, edited_name, edited_regex, edited_text, edited_emoji, f"{file_name}.{file_ext}"
+                    await anyio.to_thread.run_sync(
+                        update_custom_pasta,
+                        name,
+                        edited_name,
+                        edited_regex,
+                        edited_text,
+                        edited_emoji,
+                        f"{file_name}.{file_ext}",
                     )
                     return await ctx.send(f"🍝 Successfully edited copyasta {name}", ephemeral=True)
 
