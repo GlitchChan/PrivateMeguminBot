@@ -20,6 +20,7 @@ loguru = "^0.7.2"
 peewee = "^3.17.5"
 twikit = "^1.6.2"
 enlighten = "^1.12.4"
+rocksdict = "^0.3.23"
 
 [tool.poetry.group.dev]
 optional = true
