@@ -3,7 +3,7 @@ import typing
 import interactions as ipy
 
 from necoarc.config import CONFIG
-from necoarc.const import LOGGER, ROOT
+from necoarc.const import ROOT
 from necoarc.db import Server, User, pw_db, rd_db
 
 __all__ = ("NecoArc",)
